@@ -9,18 +9,18 @@ clean:
 main.o: main.c input_matrix.h modularity_matrix.h 
 	gcc $(FLAGS) -c main.c
 	
-input_matrix.o: input_matrix.c
+input_matrix.o: input_matrix.h
 	gcc $(FLAGS) -c input_matrix.c
 
 modularity_matrix.o: input_matrix.h modularity_matrix.h
 	gcc $(FLAGS) -c modularity_matrix.c
 	
-leading_eigenpair.o: power_iteration.h
+leading_eigenpair.o: power_iteration.h leading_eigenpair.h
 	gcc $(FLAGS) -c leading_eigenpair.c
 	
-power_iteration.o: modularity_matrix.h
+power_iteration.o: modularity_matrix.h power_iteration.h
 	gcc $(FLAGS) -c power_iteration.c
 
-maximize_modularity.o: leading_eigenpair.o modularity_matrix.o
+maximize_modularity.o: leading_eigenpair.h modularity_matrix.h maximize_modularity.h
 	gcc $(FLAGS) -c maximize_modularity.c
 	

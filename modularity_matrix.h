@@ -26,9 +26,10 @@ typedef struct modularity_matrix{
 modularity_matrix* create_modularity_matrix(sparse_matrix *adjacency_matrix, int* sub_vertices_group, int group_size);
 int* calc_sub_degrees_vector(int* sub_vertices_group, modularity_matrix* mod_matrix);
 double* calc_vertices_mod_vec(modularity_matrix* mod_matrix);
-int get_total_expected_degree(int vertex, modularity_matrix* mod_matrix, int* sub_vertices_group_ptr);
-int get_total_subgroup_neighbors(int vertex, modularity_matrix* mod_matrix, int* sub_vertices_group_ptr);
+double get_total_expected_degree(int vertex, modularity_matrix* mod_matrix, int* sub_vertices_group_ptr);
+void get_total_subgroup_neighbors(int vertex, modularity_matrix* mod_matrix, int* sub_vertices_group_ptr, int* result);
 double calc_norm_1(modularity_matrix* mod_matrix);
 double calc_mod_matrix_cell(modularity_matrix* mod_matrix, int row, int col);
+void free_modularity_matrix(modularity_matrix *mod_matrix);
 
 #endif /* MODULARITY_MATRIX_H_ */

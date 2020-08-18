@@ -14,6 +14,7 @@
 #include <assert.h>
 #include <time.h>
 #include "modularity_matrix.h"
+#include "leading_eigenpair.h"
 
 #define IS_NOT_POSITIVE(X) ((X) <= 0.00001)
 
@@ -24,6 +25,11 @@ int main(int argc, char* argv[]) {
 	sparse_matrix *input_matrix;
 	int vertices_num;
 	int n;
+	int i;
+	int* sub_vertices_group;
+	int* sub_vertices_group_ptr;
+	modularity_matrix* mod_matrix;
+	/*eading_eigenpair* leading_pair;*/
 
 	FILE* input_file;
 	FILE* output_file;
@@ -43,14 +49,32 @@ int main(int argc, char* argv[]) {
 
 	n = fread(&vertices_num, sizeof(int), 1, input_file);
 	assert(n == 1);
+	printf("vertices num is %d\n", vertices_num);
 
 	printf("%s\n","starting read input into sparse");
+
 	input_matrix = read_input_into_sparse(input_file, vertices_num);
 	print_degrees_vector(*input_matrix);
 	printf("%s\n","finishing read input into sparse");
 
 	write_input_matrix(*input_matrix, output_file);
 	printf("%s\n","finishing write input");
+
+	sub_vertices_group = (int*)calloc(vertices_num, sizeof(int));
+	sub_vertices_group_ptr = sub_vertices_group;
+
+	for (i = 0; i < vertices_num; i++) {
+		*sub_vertices_group_ptr = i;
+		sub_vertices_group_ptr++;
+		printf("sub_vertices_group[i] is %d \n", sub_vertices_group[i]);
+	}
+
+
+	mod_matrix = create_modularity_matrix(input_matrix, sub_vertices_group, vertices_num);
+	printf("%s\n","finishing create modularity matrix");
+
+	/*leading_pair = create_eigenpair(mod_matrix);
+	printf("%s\n","finishing eigenpair");*/
 
 	fclose(input_file);
 	fclose(output_file);
@@ -59,7 +83,11 @@ int main(int argc, char* argv[]) {
 
 	printf("Execution time is %f seconds\n", ((double)(end_time-start_time) / CLOCKS_PER_SEC));
 
-	free_sparse_matrix(input_matrix);
+	/*free_sparse_matrix(input_matrix);
+	free_modularity_matrix(mod_matrix);*/
+
+	free(input_matrix);
+	free(mod_matrix);
 
 	return EXIT_SUCCESS;
 

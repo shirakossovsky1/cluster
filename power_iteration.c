@@ -5,18 +5,8 @@
  *      Author: shira
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>
-#include <assert.h>
-#include <time.h>
-#include <math.h>
 
-#include "modularity_matrix.h"
 #include "power_iteration.h"
-
 
 void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 
@@ -28,8 +18,6 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 	double *curr_vec_ptr,*vec_0_ptr;
 
 	int num_rows;
-	int i = 0;
-	clock_t	start_time, end_time;
 
 	num_rows = mod_matrix -> sub_vertices_group_size;
 
@@ -50,10 +38,10 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 	}
 	vec_0_ptr = vec_0;
 
-	get_next_vec(mod_matrix, vec_0, next_vec, curr_row , mod_matrix->sub_vertices_group_size);
+	get_next_vec(mod_matrix, vec_0, next_vec, mod_matrix->sub_vertices_group_size);
 
 	while (smaller_than_eps(curr_vec, next_vec, num_rows) != 1) {
-		get_next_vec(mod_matrix, curr_vec, next_vec, curr_row , mod_matrix->sub_vertices_group_size);
+		get_next_vec(mod_matrix, curr_vec, next_vec, mod_matrix->sub_vertices_group_size);
 	}
 
 	free(vec_0);
@@ -90,9 +78,10 @@ int smaller_than_eps(double* vec, double* next_vec, int vec_size) {
 	return 1;
 }
 
-void get_next_vec(modularity_matrix* mod_matrix, double* vec, double* next_vec, double* curr_row , int vec_size){
+void get_next_vec(modularity_matrix* mod_matrix, double* vec, double* next_vec, int vec_size){
 	double result;
 	double vec_norm = 0;
+	int curr_row = 0;
 
 	double *vec_ptr;
 	double *next_vec_ptr = next_vec;
@@ -103,6 +92,7 @@ void get_next_vec(modularity_matrix* mod_matrix, double* vec, double* next_vec, 
 		vec_norm += result*result;
 		*next_vec_ptr = result;
 		next_vec_ptr++;
+		curr_row++;
  	}
 	vec_norm = sqrt(vec_norm);
 
@@ -122,11 +112,11 @@ double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row){
 	double d;
 	
 	a = mult_sparse_mat_row_by_vec(mod_matrix, vec, row);
-	b = dot_product(mod_matrix -> sub_degrees_vector, vec, mod_matrix -> sub_vertices_group_size);
+	b = dot_product((double*)mod_matrix -> sub_degrees_vector, vec, mod_matrix -> sub_vertices_group_size);
 	c = mod_matrix->vertices_mod_vec[row] * sum_vec(vec, mod_matrix -> sub_vertices_group_size);
 	d = vec[row] * (mod_matrix -> norm_1);
 
-	result = a - b -c + d;
+	result = a - b - c + d;
 
 	return result;
 	
@@ -136,15 +126,15 @@ double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row){
 /* Multiplies matrix A by vector v, into result (result is pre-allocated), with link-list */
 double mult_sparse_mat_row_by_vec(modularity_matrix* mod_matrix, double *vec, int row){
 
-	int 			j = 0;
 	double 			result = 0.0;
 	node 			*neighbor_ptr;
 	int				*sub_vertices_group_ptr; /* pointer for g */
-	int				*vec_ptr;
+	double				*vec_ptr;
 
 	vec_ptr = vec;
+	sub_vertices_group_ptr = mod_matrix -> sub_vertices_group;
 
-	neighbor_ptr = mod_matrix -> adjacency_matrix -> rows[row] -> head;
+	neighbor_ptr = mod_matrix -> adjacency_matrix -> rows[row].head;
 
 	while (*sub_vertices_group_ptr <= mod_matrix -> sub_vertices_group[mod_matrix -> sub_vertices_group_size] &&
 			neighbor_ptr != NULL) {
@@ -170,16 +160,37 @@ double mult_sparse_mat_row_by_vec(modularity_matrix* mod_matrix, double *vec, in
 }
 
 /* Multiplies matrix A by vector v, into result (result is pre-allocated), with link-list */
-double mult_sparse_mat_by_vec(modularity_matrix* mod_matrix, double *vec){
+/*double mult_sparse_mat_by_vec(modularity_matrix* mod_matrix, double *vec){
 	
 
+}*/
+
+double dot_product(double* vector_1, double* vector_2, int vec_size){
+	double result = 0.0;
+	double *vector_1_ptr;
+	double *vector_2_ptr;
+	int i;
+
+	vector_1_ptr = vector_1;
+	vector_2_ptr = vector_2;
+
+	for (i = 0; i < vec_size; i++) {
+		result += *vector_1_ptr * *vector_2_ptr;
+		vector_1_ptr++;
+		vector_2_ptr++;
+	}
+
+	return result;
 }
 
-double dot_product(int* vector_1, double* vector_2, int vec_size){
-	double result;
+double int_dot_product(int* vector_1, double* vector_2, int vec_size){
+	double result = 0.0;
 	int *vector_1_ptr;
 	double *vector_2_ptr;
 	int i;
+
+	vector_1_ptr = vector_1;
+	vector_2_ptr = vector_2;
 
 	for (i = 0; i < vec_size; i++) {
 		result += *vector_1_ptr * *vector_2_ptr;
@@ -191,9 +202,11 @@ double dot_product(int* vector_1, double* vector_2, int vec_size){
 }
 
 double sum_vec(double* vector, int vec_size){
-	double result;
+	double result = 0.0;
 	double *vector_ptr;
 	int i;
+
+	vector_ptr = vector;
 
 	for (i = 0; i < vec_size; i++) {
 		result += *vector_ptr;
