@@ -18,7 +18,14 @@
 #include "leading_eigenpair.h"
 #include "modularity_matrix.h"
 
+typedef struct maximum_in_array{
+	int 			arg_max; /* A as a sparse matrix */
+	double 			max_value;
+	double 			*array;
+} maximum_in_array;
+
 double calc_modularity_delta(leading_eigenpair* eigenpair);
+double improve_modularity(leading_eigenpair* eigenpair);
 
 
 #endif /* MAXIMIZE_MODULARITY_H_ */

@@ -58,10 +58,14 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 
 	for (i = 0; i < eigenpair->mod_matrix->sub_vertices_group_size; i++) {
 		q0 = calc_modularity_delta(eigenpair);
+
+		/* trying to move each vertex to the other group and store the vretex's score */
 		for (j = 0; j < eigenpair -> mod_matrix -> adjacency_matrix -> dim; j++) {
-			if (*unmoved_ptr == 0) {
+			if (unmoved[j] == 0) {
 				division_vector[j] *= -1.0;
 				curr_q = calc_modularity_delta(eigenpair);
+
+				/* store the max score and the vertex with the maximal score (which is going to be moved) */
 				if (curr_q > max_score) {
 					max_score = curr_q;
 					max_score_vertex = j;
@@ -71,9 +75,11 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 			}
 		}
 
+		/* moving the vertex with the maximal score to the other group */
 		division_vector[max_score_vertex] *= -1.0;
 		indices[i] = max_score_vertex;
 
+		/* store the accomulative improvemnt of the score in iteration i */
 		if (i == 0) {
 			improve[i] = score[max_score_vertex];
 		}
@@ -81,6 +87,7 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 			improve[i] = improve[i-1] + score[max_score_vertex];
 		}
 
+		/* store the max accomulative improvemnt */
 		if (improve[i] > max_accomulative_improvement) {
 			max_accomulative_improvement = improve[i];
 			max_accomulative_improvement_vertex = i;
@@ -89,11 +96,13 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 		unmoved[max_score_vertex] = 1;
 
 	}
+
 	/* remove back to original group the vertices that did not contribute to improvement */
-	for (k = eigenpair->mod_matrix->sub_vertices_group_size; k > max_accomulative_improvement_vertex; k--) {
+	for (k = eigenpair -> mod_matrix->sub_vertices_group_size; k > max_accomulative_improvement_vertex; k--) {
 		division_vector[indices[k]] *= -1.0;
 	}
 
+	/*  improvement */
 	if (max_accomulative_improvement_vertex == (eigenpair->mod_matrix->sub_vertices_group_size -1)) {
 		delta_q = 0.0;
 	}
