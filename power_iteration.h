@@ -24,7 +24,7 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector);
 double* generate_rand_vec(double* vec_0, int vec_size);
 void get_next_vec(modularity_matrix* mod_matrix, double* vec, double* next_vec, int vec_size);
 int smaller_than_eps(double* vec, double* next_vec, int vec_size);
-double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row);
+double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row, bool to_shift);
 double mult_sparse_mat_row_by_vec(modularity_matrix* mod_matrix, double *vec, int row);
 double dot_product(double* vector_1, double* vector_2, int vec_size);
 double int_dot_product(int* vector_1, double* vector_2, int vec_size);

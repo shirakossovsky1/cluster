@@ -7,19 +7,25 @@ C_SRCS += \
 ../input_matrix.c \
 ../leading_eigenpair.c \
 ../main.c \
+../main_neo_tester.c \
+../maximize_modularity.c \
 ../modularity_matrix.c \
 ../power_iteration.c 
 
 O_SRCS += \
-../cluster.o \
 ../input_matrix.o \
+../leading_eigenpair.o \
 ../main.o \
-../modularity_matrix.o 
+../maximize_modularity.o \
+../modularity_matrix.o \
+../power_iteration.o 
 
 OBJS += \
 ./input_matrix.o \
 ./leading_eigenpair.o \
 ./main.o \
+./main_neo_tester.o \
+./maximize_modularity.o \
 ./modularity_matrix.o \
 ./power_iteration.o 
 
@@ -27,6 +33,8 @@ C_DEPS += \
 ./input_matrix.d \
 ./leading_eigenpair.d \
 ./main.d \
+./main_neo_tester.d \
+./maximize_modularity.d \
 ./modularity_matrix.d \
 ./power_iteration.d 
 

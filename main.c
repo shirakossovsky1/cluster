@@ -15,6 +15,7 @@
 #include <time.h>
 #include "modularity_matrix.h"
 #include "leading_eigenpair.h"
+#include "maximize_modularity.h"
 
 #define IS_NOT_POSITIVE(X) ((X) <= 0.00001)
 
@@ -29,7 +30,8 @@ int main(int argc, char* argv[]) {
 	int* sub_vertices_group;
 	int* sub_vertices_group_ptr;
 	modularity_matrix* mod_matrix;
-	/*eading_eigenpair* leading_pair;*/
+	leading_eigenpair* leading_pair;
+	double modularity_delta;
 
 	FILE* input_file;
 	FILE* output_file;
@@ -69,12 +71,18 @@ int main(int argc, char* argv[]) {
 		printf("sub_vertices_group[i] is %d \n", sub_vertices_group[i]);
 	}
 
-
 	mod_matrix = create_modularity_matrix(input_matrix, sub_vertices_group, vertices_num);
 	printf("%s\n","finishing create modularity matrix");
 
-	/*leading_pair = create_eigenpair(mod_matrix);
-	printf("%s\n","finishing eigenpair");*/
+	leading_pair = create_eigenpair(mod_matrix);
+	printf("%s\n","finishing eigenpair");
+
+	printf("%s\n","starting modularity delta");
+
+	modularity_delta = calc_modularity_delta(leading_pair);
+
+	printf("modularity_delta is %f\n",modularity_delta);
+	printf("%s\n","finishing modularity delta");
 
 	fclose(input_file);
 	fclose(output_file);
@@ -86,6 +94,8 @@ int main(int argc, char* argv[]) {
 	/*free_sparse_matrix(input_matrix);
 	free_modularity_matrix(mod_matrix);*/
 
+	free_leading_eigenpair(leading_pair);
+	free(leading_pair);
 	free(input_matrix);
 	free(mod_matrix);
 

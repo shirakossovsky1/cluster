@@ -43,11 +43,10 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
 	adjancency_mat -> rows = rows;
 	printf("aaaaaaaaaadjancency_mat -> dim = %d\n", adjancency_mat -> dim);
 
-	for (k = 0; k < 3; k++) {
+	for (k = 0; k < vertices_num; k++) {
 
 		n = fread(&vertex_degree, sizeof(int), 1, input_file);
 		assert(n == 1);
-		assert(vertex_degree == 2);
 
 		*curr_row = *add_row(input_file, vertex_degree);
 		curr_row++;
