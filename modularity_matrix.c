@@ -16,7 +16,7 @@ modularity_matrix* create_modularity_matrix(sparse_matrix *adjacency_matrix, int
 
 	modularity_matrix* mod_matrix;
 
-	printf("%s\n","starting inside mod matrix file");
+	printf("%s\n","&&& starting inside mod matrix file &&&");
 
 	mod_matrix = (modularity_matrix*)malloc(sizeof(modularity_matrix));
 
@@ -26,21 +26,17 @@ modularity_matrix* create_modularity_matrix(sparse_matrix *adjacency_matrix, int
 	}
 
 	mod_matrix -> total_degrees_num = adjacency_matrix -> total_degrees;
-	printf("total_degrees_num %d\n",mod_matrix -> total_degrees_num);
-	/*printf("degrees vector [0] is %d\n",adjacency_matrix -> degrees_vector[0]);
-	printf("degrees vector [1] is %d\n",adjacency_matrix -> degrees_vector[1]);
-	printf("degrees vector [2] is %d\n",adjacency_matrix -> degrees_vector[2]);*/
 	mod_matrix -> degrees_vector = adjacency_matrix -> degrees_vector;
-	/*printf("%s\n","hey 2");*/
 	mod_matrix -> adjacency_matrix = adjacency_matrix;
 	mod_matrix -> sub_vertices_group = sub_vertices_group;
 	mod_matrix -> sub_vertices_group_size = group_size;
-	printf("mod_matrix -> sub_vertices_group_size is %d\n",mod_matrix -> sub_vertices_group_size);
+	printf("sub_vertices_group_size is %d\n",mod_matrix -> sub_vertices_group_size);
 	mod_matrix -> sub_degrees_vector = calc_sub_degrees_vector(sub_vertices_group, mod_matrix);
-	printf("sub_degrees_vector[0] = %d\n",mod_matrix -> sub_degrees_vector[0]);
 	mod_matrix -> vertices_mod_vec = calc_vertices_mod_vec(mod_matrix);
 	mod_matrix -> norm_1 = calc_norm_1(mod_matrix);
 	printf("norm 1 is %f\n",mod_matrix -> norm_1);
+
+	printf("%s\n","&&& finishing inside mod matrix file &&&");
 
 	return mod_matrix;
 }
@@ -52,25 +48,22 @@ int* calc_sub_degrees_vector(int* sub_vertices_group, modularity_matrix* mod_mat
 	int* sub_degrees_vector_ptr;
 	int* degrees_vector_ptr;
 	int i;
-	int vertices_num;
+	int subgroup_size;
 
 	sub_vertices_group_ptr = sub_vertices_group;
 	sub_degrees_vector_ptr = sub_degrees_vector;
 	degrees_vector_ptr = mod_matrix -> degrees_vector;
 
-	vertices_num = mod_matrix -> sub_vertices_group_size;
-	printf("vertices_num is %d\n",vertices_num);
+	subgroup_size = mod_matrix -> sub_vertices_group_size;
+	printf("vertices_num is %d\n",subgroup_size);
 
-	for (i = 0; i < vertices_num; i++) {
-		printf("sub_vertices_group[i] is %d \n", sub_vertices_group[i]);
+	for (i = 0; i < subgroup_size; i++) {
+		printf("sub_vertices_group[%d] is %d \n", i, sub_vertices_group[i]);
 	}
 
-	printf("for loop limit is %d\n",sub_vertices_group[vertices_num -1]);
-	for (i = 0; i < sub_vertices_group[vertices_num - 1]+1; i++) {
-		printf("i is %d, sub_vertices_group_ptr is %d\n", i, *(sub_vertices_group_ptr));
+	for (i = 0; i < sub_vertices_group[subgroup_size - 1]+1; i++) {
 		if (i == *(sub_vertices_group_ptr)) {
 			*sub_degrees_vector_ptr = *degrees_vector_ptr;
-			printf("added %d to sub degrees vec\n",*sub_degrees_vector_ptr);
 			sub_vertices_group_ptr++;
 			sub_degrees_vector_ptr++;
 		}
@@ -89,13 +82,10 @@ double* calc_vertices_mod_vec(modularity_matrix* mod_matrix) {
 
 	double* vertices_mod_vec = (double*)calloc(mod_matrix -> sub_vertices_group_size, sizeof(double));
 	int* sub_vertices_group_ptr = mod_matrix -> sub_vertices_group;
-	printf("*(sub_vertices_group_ptr) is %d\n", *(sub_vertices_group_ptr));
 	vertices_mod_vec_ptr = vertices_mod_vec; /* f */
 
 	for (vertex = 0; vertex < mod_matrix -> adjacency_matrix -> dim; vertex++) {
 		/* if vertex is not in subgroup then skip -> value in the vector will be 0 */
-
-		printf("sub_vertices_group_ptr is %d\n",*sub_vertices_group_ptr);
 
 		if (vertex < *sub_vertices_group_ptr) {
 			vertices_mod_vec_ptr++;
@@ -118,16 +108,16 @@ double* calc_vertices_mod_vec(modularity_matrix* mod_matrix) {
 		total_expected_degrees = result[1]* vertex_degree / (mod_matrix -> total_degrees_num);;*/
 
 
-		printf("total_expected_degrees for vertex %d is %f\n",vertex,total_expected_degrees);
+		/*printf("total_expected_degrees for vertex %d is %f\n",vertex,total_expected_degrees);
 		printf("total_subgroup_neighbors for vertex %d is %d\n",vertex,total_subgroup_neighbors);
 
-		/* apply the value for Fig */
+		apply the value for Fig
 		*vertices_mod_vec_ptr = total_subgroup_neighbors - (double)total_expected_degrees;
-		printf("added %f to vertices_mod_vec (f)\n",*vertices_mod_vec_ptr);
+		printf("added %f to f_vector (f)\n",*vertices_mod_vec_ptr);
 
-		/* if the last vertex in subgroup is reached then quit */
+		if the last vertex in subgroup is reached then quit
 		printf("sub_vertices_group[(mod_matrix -> sub_vertices_group_size) - 1] is %d\n",mod_matrix -> sub_vertices_group[(mod_matrix -> sub_vertices_group_size) - 1]);
-		printf("*(sub_vertices_group_ptr) is %d\n", *(sub_vertices_group_ptr));
+		printf("*(sub_vertices_group_ptr) is %d\n", *(sub_vertices_group_ptr));*/
 		if (*(sub_vertices_group_ptr) == mod_matrix -> sub_vertices_group[(mod_matrix -> sub_vertices_group_size) - 1]) {
 			break;
 		}
@@ -139,7 +129,6 @@ double* calc_vertices_mod_vec(modularity_matrix* mod_matrix) {
 			total_expected_degrees += get_expected_degree(vertex, g_vertex, mod_matrix -> adjacency_matrix -> total_degrees);
 		total_subgroup_neighbors += is_
 */
-
 	}
 
 	return vertices_mod_vec;
@@ -207,7 +196,7 @@ double calc_norm_1(modularity_matrix* mod_matrix) {
 		/* sum each row */
 		for (row = 0; row < mod_matrix -> adjacency_matrix -> dim; row++) {
 			col_sum += fabs(calc_mod_matrix_cell(mod_matrix, row, col));
-			printf("summing col %d, sum so far is %f\n",col, col_sum);
+			/*printf("summing col %d, sum so far is %f\n",col, col_sum);*/
 		}
 
 		/* update maximum */

@@ -17,6 +17,8 @@
 leading_eigenpair* create_eigenpair(modularity_matrix* mod_matrix) {
 	leading_eigenpair* eigenpair = (leading_eigenpair*)malloc(sizeof(leading_eigenpair));
 
+	printf("%s\n","&&&&&&&&& starting inside eigenpair file &&&&&&&&&");
+
 	eigenpair -> mod_matrix = mod_matrix;
 	eigenpair -> leading_eigenvector = find_leading_eigenvector(mod_matrix);
 	printf("eigenpair -> mod_matrix -> sub_vertices_group_size is %d\n",eigenpair -> mod_matrix -> sub_vertices_group_size);
@@ -24,6 +26,8 @@ leading_eigenpair* create_eigenpair(modularity_matrix* mod_matrix) {
 	eigenpair -> leading_eigenvalue = find_leading_eigenvalue(eigenpair);
 	printf("%s\n","calc division vector");
 	eigenpair -> division_vector = calc_division_vector(eigenpair);
+
+	printf("%s\n","&&&&&&&&& finishing inside eigenpair file &&&&&&&&&");
 
 	return eigenpair;
 }
@@ -33,7 +37,7 @@ double find_leading_eigenvalue(leading_eigenpair* eigenpair){
 	 double b;
 	 double c;
 
-	 printf("eigenpair -> mod_matrix -> sub_vertices_group_size is %d\n",eigenpair -> mod_matrix -> sub_vertices_group_size);
+	 printf("sub group size is %d\n",eigenpair -> mod_matrix -> sub_vertices_group_size);
 	 tmp_vec = (double*)malloc(sizeof(double) * (eigenpair -> mod_matrix -> sub_vertices_group_size));
 	 assert(tmp_vec != NULL);
 
@@ -65,12 +69,11 @@ double* mult_matrix_by_vector(modularity_matrix* mod_matrix, double* vec, double
 	double *next_vec_ptr = result_vec;
 	int curr_row = 0;
 
-	printf("%s\n","mult_matrix_by_vector");
-
 	for (vec_ptr=vec; vec_ptr < &vec[vec_size]; vec_ptr++) {
 		result = calc_multiplication(mod_matrix, vec, curr_row, to_shift);
 		/**vec_ptr = *next_vec_ptr;*/
 		*next_vec_ptr = result;
+		printf("result is %f\n",result);
 		next_vec_ptr++;
 		curr_row++;
  	}

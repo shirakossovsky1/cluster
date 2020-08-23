@@ -41,7 +41,6 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
 
 	adjancency_mat -> dim = vertices_num;
 	adjancency_mat -> rows = rows;
-	printf("aaaaaaaaaadjancency_mat -> dim = %d\n", adjancency_mat -> dim);
 
 	for (k = 0; k < vertices_num; k++) {
 
@@ -63,7 +62,7 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
 
 	adjancency_mat -> total_degrees = total_degrees;
 	adjancency_mat -> degrees_vector = degrees_vector;
-	printf("aaaaaaaaaaadjancency_mat -> total_degrees = %d\n", adjancency_mat -> total_degrees);
+	printf("total_degrees = %d\n", adjancency_mat -> total_degrees);
 
 	return adjancency_mat;
 }

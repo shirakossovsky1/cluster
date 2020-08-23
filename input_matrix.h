@@ -8,18 +8,7 @@
 #ifndef INPUT_MATRIX_H_
 #define INPUT_MATRIX_H_
 
-/* node object for linked list */
-typedef struct node{
-	int 	matrix_index;
-    struct 	node *next;
-} node;
-
-/* linked list object */
-typedef struct linked_list{
-	node 	*head;
-	node 	*tail;
-
-} linked_list;
+#include "utils.h"
 
 /* matrix object that will store modularity values for each vertex */
 typedef struct sparse_matrix {
