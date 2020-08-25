@@ -33,7 +33,7 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 	double delta_q = 0.0;
 	int* indices;
 	bool first;
-	int q0;
+	double q0;
 
 	max_in_array *max_score, *max_improvemnt;
 
@@ -54,6 +54,7 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 		printf("iteration %d\n", i);
 
 		q0 = calc_modularity_delta(eigenpair);
+		printf("q0 is %f\n", q0);
 
 		find_maximal_score(max_score, group_size, unmoved, eigenpair, q0);
 
@@ -61,6 +62,7 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 
 		/* moving the vertex with the maximal score to the other group */
 		division_vector[max_score -> arg_max] *= -1.0;
+		printf("the %d vertex was moved\n", max_score -> arg_max);
 		indices[i] = max_score -> arg_max;
 		unmoved[max_score -> arg_max] = 1;
 
@@ -90,7 +92,7 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 	return delta_q;
 }
 
-void find_maximal_score(max_in_array *max_score, int group_size, int* unmoved, leading_eigenpair* eigenpair, int q0) {
+void find_maximal_score(max_in_array *max_score, int group_size, int* unmoved, leading_eigenpair* eigenpair, double q0) {
 	int j;
 	double curr_q;
 	double* division_vector;

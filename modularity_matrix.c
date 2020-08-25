@@ -12,7 +12,7 @@
 #include <math.h>
 #include "modularity_matrix.h"
 
-modularity_matrix* create_modularity_matrix(sparse_matrix *adjacency_matrix, int* sub_vertices_group, int group_size) {
+modularity_matrix* create_modularity_matrix(sparse_matrix *adjacency_matrix, int* sub_vertices_group, const int group_size) {
 
 	modularity_matrix* mod_matrix;
 
@@ -79,20 +79,23 @@ double* calc_vertices_mod_vec(modularity_matrix* mod_matrix) {
 	double total_expected_degrees;
 	int total_subgroup_neighbors;
 	double* vertices_mod_vec_ptr;
+	int i;
 
 	double* vertices_mod_vec = (double*)calloc(mod_matrix -> sub_vertices_group_size, sizeof(double));
 	int* sub_vertices_group_ptr = mod_matrix -> sub_vertices_group;
 	vertices_mod_vec_ptr = vertices_mod_vec; /* f */
 
-	for (vertex = 0; vertex < mod_matrix -> adjacency_matrix -> dim; vertex++) {
-		/* if vertex is not in subgroup then skip -> value in the vector will be 0 */
+	for (i = 0; i < mod_matrix->sub_vertices_group_size; i++){
 
+		/*printf("%s\n", "hey 4");
 		if (vertex < *sub_vertices_group_ptr) {
 			vertices_mod_vec_ptr++;
 			continue;
-		}
+		}*/
 
-		vertex_degree = mod_matrix -> degrees_vector[vertex];
+		printf("%s\n", "hey 5");
+		vertex_degree = mod_matrix -> sub_degrees_vector[i];
+		vertex = mod_matrix -> sub_vertices_group[i];
 
 /*		modularity_row_sum = 0;
 		total_expected_degrees = 0;
@@ -101,29 +104,34 @@ double* calc_vertices_mod_vec(modularity_matrix* mod_matrix) {
 		/* calculate the sum of Aij for i = vertex and j is in subgroup*/
 		total_subgroup_neighbors = get_total_subgroup_neighbors(vertex, mod_matrix, mod_matrix -> sub_vertices_group);
 
+
 		/* calculate the sum of ki*kj/M for i = vertex and 1 <= j <= |V|*/
-		total_expected_degrees = get_total_expected_degree(vertex, mod_matrix, mod_matrix -> sub_vertices_group);
+		total_expected_degrees = get_total_expected_degree(vertex_degree, mod_matrix, mod_matrix -> sub_vertices_group);
 
 		/*total_subgroup_neighbors = result[0];
 		total_expected_degrees = result[1]* vertex_degree / (mod_matrix -> total_degrees_num);;*/
 
 
-		/*printf("total_expected_degrees for vertex %d is %f\n",vertex,total_expected_degrees);
+		printf("total_expected_degrees for vertex %d is %f\n",vertex,total_expected_degrees);
 		printf("total_subgroup_neighbors for vertex %d is %d\n",vertex,total_subgroup_neighbors);
 
-		apply the value for Fig
-		*vertices_mod_vec_ptr = total_subgroup_neighbors - (double)total_expected_degrees;
-		printf("added %f to f_vector (f)\n",*vertices_mod_vec_ptr);
+		/*apply the value for Fig*/
+		*vertices_mod_vec_ptr = (double)total_subgroup_neighbors - total_expected_degrees;
+		/*printf("added %f to f_vector (f)\n",*vertices_mod_vec_ptr);
 
 		if the last vertex in subgroup is reached then quit
-		printf("sub_vertices_group[(mod_matrix -> sub_vertices_group_size) - 1] is %d\n",mod_matrix -> sub_vertices_group[(mod_matrix -> sub_vertices_group_size) - 1]);
-		printf("*(sub_vertices_group_ptr) is %d\n", *(sub_vertices_group_ptr));*/
+		printf("sub_vertices_group[(mod_matrix -> sub_vertices_group_size) - 1] is %d\n",mod_matrix -> sub_vertices_group[(mod_matrix -> sub_vertices_group_size) - 1]);*/
+		printf("*(vertices_mod_vec_ptr) is %f\n", *(vertices_mod_vec_ptr));
 		if (*(sub_vertices_group_ptr) == mod_matrix -> sub_vertices_group[(mod_matrix -> sub_vertices_group_size) - 1]) {
+			printf("%s\n", "hey 1");
 			break;
 		}
+		printf("%s\n", "hey 2");
 
 		sub_vertices_group_ptr++;
 		vertices_mod_vec_ptr++;
+
+		printf("%s\n", "hey 3");
 
 /*		for (g_vertex = 0; g_vertex < mod_matrix -> sub_vertices_group_size; g_vertex++) {
 			total_expected_degrees += get_expected_degree(vertex, g_vertex, mod_matrix -> adjacency_matrix -> total_degrees);
@@ -135,20 +143,23 @@ double* calc_vertices_mod_vec(modularity_matrix* mod_matrix) {
 
 }
 
-double get_total_expected_degree(int vertex, modularity_matrix* mod_matrix, int* sub_vertices_group) {
+double get_total_expected_degree(int vertex_degree, modularity_matrix* mod_matrix, int* sub_vertices_group) {
 	int g_vertex;
-	int total_expected_degrees = 0;
+	double total_expected_degrees = 0;
 	int sum_of_subgroup_vertices_degrees = 0;
-	int vertex_degree = mod_matrix -> degrees_vector[vertex];
 	int* sub_vertices_group_ptr = sub_vertices_group;
 
 	for (g_vertex = 0; g_vertex < mod_matrix -> sub_vertices_group_size; g_vertex++) {
 		sum_of_subgroup_vertices_degrees += mod_matrix -> degrees_vector[*sub_vertices_group_ptr];
 		sub_vertices_group_ptr++;
 	}
+	printf("sum_of_subgroup_vertices_degrees is %d\n", sum_of_subgroup_vertices_degrees);
+	printf("vertex_degree is %d\n", vertex_degree);
 
 	total_expected_degrees = ((double)sum_of_subgroup_vertices_degrees * (double)vertex_degree) /
 			((double)(mod_matrix -> total_degrees_num));
+
+	printf("total_expected_degrees is %f\n", total_expected_degrees);
 
 	return total_expected_degrees;
 }
@@ -186,17 +197,17 @@ double calc_norm_1(modularity_matrix* mod_matrix) {
 
 	double max_col_sum = 0.0;
 	double col_sum = 0.0;
-	int col;
-	int row;
+	int* col;
+	int* row;
 
 	/* go over matrix's columns */
-	for (col = 0; col < mod_matrix -> adjacency_matrix -> dim; col++) {
+	for (col = mod_matrix->sub_vertices_group; col <= &(mod_matrix->sub_vertices_group[mod_matrix->sub_vertices_group_size-1]); col++){
 		col_sum = 0.0;
 
 		/* sum each row */
-		for (row = 0; row < mod_matrix -> adjacency_matrix -> dim; row++) {
-			col_sum += fabs(calc_mod_matrix_cell(mod_matrix, row, col));
-			/*printf("summing col %d, sum so far is %f\n",col, col_sum);*/
+		for (row = mod_matrix->sub_vertices_group; row <= &(mod_matrix->sub_vertices_group[mod_matrix->sub_vertices_group_size-1]); row++){
+			col_sum += fabs(calc_mod_matrix_cell(mod_matrix, *row, *col));
+			printf("matrix cell in place (%d,%d) is %f\n",*row,*col,calc_mod_matrix_cell(mod_matrix, *row, *col));
 		}
 
 		/* update maximum */
@@ -204,8 +215,11 @@ double calc_norm_1(modularity_matrix* mod_matrix) {
 			max_col_sum = col_sum;
 		}
 	}
+
 	return max_col_sum;
-}
+
+	}
+
 
 /* given i,j  - return Bij hat */
 double calc_mod_matrix_cell(modularity_matrix* mod_matrix, int row, int col) {

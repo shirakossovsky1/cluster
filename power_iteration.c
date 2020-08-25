@@ -58,16 +58,18 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 				*curr_vec_ptr = *next_vec_ptr;
 				curr_vec_ptr++;
 			}
-
 		get_next_vec(mod_matrix, curr_vec, next_vec, mod_matrix->sub_vertices_group_size);
 	}
 
 	next_vec_ptr = next_vec;
 
+	printf("\n%s","eigenvector vector is ");
 	for (next_vec_ptr=next_vec ; next_vec_ptr <= &next_vec[num_rows-1] ; next_vec_ptr++){
 			*eigen_vector_ptr = *next_vec_ptr;
+			printf("%f, ",*eigen_vector_ptr);
 			eigen_vector_ptr++;
 		}
+	printf("\n");
 
 	free(vec_0);
 	free(curr_vec);
@@ -81,9 +83,12 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 double* generate_rand_vec(double* vec_0, int vec_size) {
 	double* vec_0_ptr;
 
+	printf("\n%s","vec 0 is ");
 	for (vec_0_ptr=vec_0 ; vec_0_ptr < &vec_0[vec_size] ; vec_0_ptr++){
 		*vec_0_ptr = rand()%10;
+		printf("%f, ",*vec_0_ptr);
 	}
+	printf("\n");
 
 	return vec_0;
 
@@ -107,23 +112,22 @@ int smaller_than_eps(double* vec, double* next_vec, int vec_size) {
 
 void get_next_vec(modularity_matrix* mod_matrix, double* vec, double* next_vec, int vec_size){
 	double result;
-	double vec_norm = 0;
+	double vec_norm = 0.0;
 	int curr_row = 0;
 
-	double *vec_ptr;
 	double *next_vec_ptr = next_vec;
 
-	for (vec_ptr=vec; vec_ptr <= &vec[vec_size-1]; vec_ptr++) {
+	for (curr_row = 0; curr_row < vec_size ; curr_row++) {
 		result = calc_multiplication(mod_matrix, vec, curr_row, true);
-		vec_norm += *vec_ptr * *vec_ptr;
+
+		vec_norm += result * result;
 		/**vec_ptr = *next_vec_ptr;*/
 		*next_vec_ptr = result;
 		next_vec_ptr++;
-		curr_row++;
  	}
 	vec_norm = sqrt(vec_norm);
 
-	/*printf("norm is %f\n",vec_norm);*/
+	printf("norm is %f\n",vec_norm);
 
 	/*printf("\n%s","vector is ");*/
 	for (next_vec_ptr=next_vec; next_vec_ptr <= &next_vec[vec_size-1]; next_vec_ptr++){
@@ -143,22 +147,27 @@ double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row, 
 	/*double c;*/
 	double d;
 	double *vec_ptr;
+	int row_in_original_matrix;
+
+	row_in_original_matrix = mod_matrix->sub_vertices_group[row];
+
 
 	vec_ptr = vec;
-	/*printf("1 - vec_ptr[0] = %f\n",vec_ptr[0]);
-	printf("1 - vec_ptr[1] = %f\n",vec_ptr[1]);
+	/*printf("row is = %d\n",row);
+	printf("row_in_original_matrix is = %d\n",row_in_original_matrix);*/
+	/*printf("1 - vec_ptr[1] = %f\n",vec_ptr[1]);
 	printf("1 - vec_ptr[2] = %f\n",vec_ptr[2]);
 	printf("to_shift = %d\n",to_shift);
 	printf("(power iteration) sub_degrees_vector[0] = %d\n",mod_matrix -> sub_degrees_vector[0]);
 
 	printf("vec_ptr[0] = %f\n",vec_ptr[0]);*/
-	a = mult_sparse_mat_row_by_vec(mod_matrix, vec_ptr, row);
+	a = mult_sparse_mat_row_by_vec(mod_matrix, vec_ptr, row_in_original_matrix);
 
 	vec_ptr = vec;
 	/*printf("2 - vec_ptr[0] = %f\n",vec_ptr[0]);
 	printf("2 - vec_ptr[1] = %f\n",vec_ptr[1]);
 	printf("2 - vec_ptr[2] = %f\n",vec_ptr[2]);*/
-	b = (double)(mod_matrix->degrees_vector[row]) * int_dot_product(mod_matrix -> sub_degrees_vector, vec_ptr, mod_matrix -> sub_vertices_group_size)
+	b = (double)(mod_matrix->degrees_vector[row_in_original_matrix]) * int_dot_product(mod_matrix -> sub_degrees_vector, vec_ptr, mod_matrix -> sub_vertices_group_size)
 			/ (double)mod_matrix->total_degrees_num;
 	/*c = mod_matrix->vertices_mod_vec[row] * sum_vec(vec, mod_matrix -> sub_vertices_group_size);*/
 
@@ -167,19 +176,19 @@ double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row, 
 	printf("3 - vec_ptr[1] = %f\n",vec_ptr[1]);
 	printf("3 - vec_ptr[2] = %f\n",vec_ptr[2]);*/
 	if (to_shift) {
-		d = vec_ptr[row] * ((mod_matrix -> norm_1) - mod_matrix->vertices_mod_vec[row]);
+		/*printf("%s\n","shifting");*/
+		d = vec_ptr[row] * ((mod_matrix -> norm_1) - mod_matrix->vertices_mod_vec[row_in_original_matrix]);
 	}
 	else {
 		/*printf("vec_ptr[row] = %f\n",vec_ptr[row]);
 		printf("mod_matrix->vertices_mod_vec[row] = %f\n",mod_matrix->vertices_mod_vec[row]);*/
-		d = -1.0 * (vec_ptr[row] * (mod_matrix->vertices_mod_vec[row]));
+		d = -1.0 * (vec_ptr[row] * (mod_matrix->vertices_mod_vec[row_in_original_matrix]));
 	}
 
 	result = a - b + d;
 
 	/*printf("a is %f, ",a);
 	printf("b is %f, ",b);
-	printf("c is %f, ",c);
 	printf("d is %f, ",d);*/
 
 	return result;

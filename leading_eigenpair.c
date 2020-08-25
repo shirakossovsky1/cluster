@@ -48,7 +48,7 @@ double find_leading_eigenvalue(leading_eigenpair* eigenpair){
 
 	 free(tmp_vec);
 
-	 printf("leading eigenvalue is %f\n",((b / c) - (eigenpair -> mod_matrix -> norm_1)));
+	 printf("leading eigenvalue is (after substracting norm) %f\n",((b / c) - (eigenpair -> mod_matrix -> norm_1)));
 
 	 return ((b / c) - (eigenpair -> mod_matrix -> norm_1));
 }
@@ -73,7 +73,7 @@ double* mult_matrix_by_vector(modularity_matrix* mod_matrix, double* vec, double
 		result = calc_multiplication(mod_matrix, vec, curr_row, to_shift);
 		/**vec_ptr = *next_vec_ptr;*/
 		*next_vec_ptr = result;
-		printf("result is %f\n",result);
+		/*printf("result is %f\n",result);*/
 		next_vec_ptr++;
 		curr_row++;
  	}

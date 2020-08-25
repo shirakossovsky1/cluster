@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 	FILE* input_file;
 	FILE* output_file;
 
-	/*int vertices[14] = {5,2,1,2,2,0,2,2,0,1,1,4,1,3};*/
+	/*int vertices[15] = {6,2,1,2,2,0,2,2,0,1,1,4,1,3,0};*/
 
 	/*pre-process inputs before reading input into sparse matrix*/
 	clock_t	start_time, end_time;
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
 
 	assert(argc == 3);
 
-	/*fwrite(vertices, sizeof(int), 14, input_file);*/
+	/*fwrite(vertices, sizeof(int), 15, input_file);*/
 
 	n = fread(&vertices_num, sizeof(int), 1, input_file);
 	/*assert(n == 1);*/
@@ -163,7 +163,11 @@ int main(int argc, char* argv[]) {
 			continue;
 		}
 
-		delta_Q = improve_modularity(leading_pair); /*algorithm 4*/
+		delta_Q = modularity_delta;
+
+		while (!IS_NOT_POSITIVE(delta_Q)) {
+			delta_Q = improve_modularity(leading_pair); /*algorithm 4*/
+		}
 
 		curr_division =  create_division(leading_pair->division_vector, mod_matrix->sub_vertices_group,
 				mod_matrix->sub_vertices_group_size);
@@ -195,6 +199,7 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
+		printf("aaaaaaaaaa&&&&&   sub_vertices_group->size is %d\n",sub_vertices_group->size);
 		for (i = 0; i < sub_vertices_group->size; i++) {
 			printf("division_vector[%d] after optimization = %f\n", i, curr_division ->division_vector[i]);
 		}
