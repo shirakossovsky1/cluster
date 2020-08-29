@@ -13,18 +13,18 @@
 
 typedef struct leading_eigenpair{
 
-	double *leading_eigenvector;
-	double leading_eigenvalue;
+	float 			  *leading_eigenvector;
+	float 			  leading_eigenvalue;
 	modularity_matrix *mod_matrix;
-	double *division_vector;
+	float 			  *division_vector;
 
 }leading_eigenpair;
 
 leading_eigenpair* create_eigenpair(modularity_matrix* mod_matrix);
-double find_leading_eigenvalue(leading_eigenpair* eigenpair);
-double* find_leading_eigenvector(modularity_matrix* mod_matrix);
-double* mult_matrix_by_vector(modularity_matrix* mod_matrix, double* vec, double* result_vec, int vec_size, bool to_shift);
-double* calc_division_vector(leading_eigenpair* eigenpair);
+float find_leading_eigenvalue(leading_eigenpair* eigenpair);
+float* find_leading_eigenvector(modularity_matrix* mod_matrix);
+float* mult_matrix_by_vector(modularity_matrix* mod_matrix, float* vec, float* result_vec, unsigned int vec_size, bool to_shift);
+float* calc_division_vector(leading_eigenpair* eigenpair);
 void free_leading_eigenpair(leading_eigenpair* eigenpair);
 
 #endif /* LEADING_EIGENPAIR_H_ */

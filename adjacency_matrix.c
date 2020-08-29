@@ -5,28 +5,21 @@
  *      Author: shira
  */
 
+#include "adjacency_matrix.h"
+
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 
-#include "input_matrix.h"
-
-sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
-	int vertex_degree;
-	int n;
-	int total_degrees = 0;
-	int* degrees_vector;
-	int k = 0;
-	linked_list* curr_row;
-	int* degree_vector_ptr;
-	sparse_matrix* adjancency_mat;
-
-	linked_list* rows;
+sparse_matrix* read_input_into_sparse(FILE* input_file, unsigned int vertices_num) {
+	unsigned int k = 0, n = 0, vertex_degree, total_degrees = 0, *degrees_vector, *degree_vector_ptr;
+	linked_list *curr_row, *rows, *curr_list;
+	sparse_matrix *adjancency_mat;
 
 	rows = (linked_list*)malloc(sizeof(linked_list) * vertices_num);
 	assert(rows != NULL);
 
-	degrees_vector = (int*)calloc(sizeof(int), vertices_num);
+	degrees_vector = (unsigned int*)calloc(sizeof(unsigned int), vertices_num);
 	assert(degrees_vector != NULL);
 
 	curr_row = rows;
@@ -35,16 +28,19 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
 	adjancency_mat = (sparse_matrix*)malloc(sizeof(sparse_matrix));
 	assert(adjancency_mat != NULL);
 
-
 	adjancency_mat -> dim = vertices_num;
 	adjancency_mat -> rows = rows;
 
 	for (k = 0; k < vertices_num; k++) {
 
-		n = fread(&vertex_degree, sizeof(int), 1, input_file);
-		assert(n == 1);
+		n = fread(&vertex_degree, sizeof(unsigned int), 1, input_file);
+		check_reading_writing(n, 1, 'r');
 
-		*curr_row = *add_row(input_file, vertex_degree);
+		curr_list = (linked_list*)malloc(sizeof(linked_list));
+
+		add_row(input_file, vertex_degree,curr_list);
+		*curr_row = *curr_list;
+
 		curr_row++;
 
 		/*insert value into degrees vector*/
@@ -64,17 +60,12 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
 	return adjancency_mat;
 }
 
-linked_list* add_row(FILE* input_file, int vertex_degree){
+linked_list* add_row(FILE* input_file, unsigned int vertex_degree, linked_list *curr_list){
 
-	int 			j = 0;
-	linked_list 	*curr_list;
-	int*			neighbors_arr;
-	int*			curr_neighbor;
-	int 			neighbors;
+	unsigned int 	j = 0, neighbors, *neighbors_arr, *curr_neighbor;
 
 	/* allocate a new linked list */
-	curr_list = (linked_list*)malloc(sizeof(linked_list));
-	assert(curr_list != NULL);
+
 	curr_list -> head = NULL;
 	curr_list -> tail = NULL;
 
@@ -83,10 +74,10 @@ linked_list* add_row(FILE* input_file, int vertex_degree){
 	}
 
 	/* read vertex's neighbors into array */
-	neighbors_arr = (int*)malloc(sizeof(int)*vertex_degree);
+	neighbors_arr = (unsigned int*)malloc(sizeof(unsigned int)*vertex_degree);
 	assert(neighbors_arr != NULL);
-	neighbors = fread(neighbors_arr, sizeof(int), vertex_degree, input_file);
-	assert(neighbors == vertex_degree);
+	neighbors = fread(neighbors_arr, sizeof(unsigned int), vertex_degree, input_file);
+	check_reading_writing(neighbors, vertex_degree, 'r');
 	curr_neighbor = neighbors_arr;
 
 	/* add all non zero row values to the link list */
@@ -103,7 +94,8 @@ linked_list* add_row(FILE* input_file, int vertex_degree){
 }
 
 /* insert a new node to the link list */
-void add_node(int curr_vertex, linked_list *curr_list){
+
+void add_node(unsigned int curr_vertex, linked_list *curr_list){
 
 	node *new_node;
 
@@ -130,18 +122,21 @@ void add_node(int curr_vertex, linked_list *curr_list){
 }
 
 void write_input_matrix(sparse_matrix sparse_mat, FILE* output_file){
-	int row = 0;
+	unsigned int n, row = 0;
 	node *node;
 
 	/*printf("%s\n","starting");*/
 	for(row = 0; row < sparse_mat.dim; row++){
 		/*printf("row = %d\n", row);*/
-		fwrite(&row, sizeof(int), 1, output_file);
+		n = fwrite(&row, sizeof(unsigned int), 1, output_file);
+		check_reading_writing(n, 1, 'w');
+
 		node = (sparse_mat.rows)[row].head;
 		/*printf("rows[row] head = %d\n", node.matrix_index);*/
 		do {
 			/*printf("node.matrix_index = %d\n", node -> matrix_index);*/
-			fwrite(&(node -> matrix_index), sizeof(int), 1, output_file);
+			n = fwrite(&(node -> matrix_index), sizeof(unsigned int), 1, output_file);
+			check_reading_writing(n, 1, 'w');
 			node = node -> next;
 		}
 		while (node != NULL);
@@ -161,32 +156,23 @@ void write_input_matrix(sparse_matrix sparse_mat, FILE* output_file){
 	}
 }*/
 
-/*void free_sparse_matrix(sparse_matrix *sparse_mat){
+void free_sparse_matrix(sparse_matrix *sparse_mat){
 
-	int 		i = 0;
-	node 		*node, *tmp_node;
-	linked_list 	*list, linked_list;
-
-	*/
+	unsigned int 	i = 0;
+	linked_list 	*list, *tmp_list;
 
 	/* free degrees vector */
-	/*free(sparse_mat->degrees_vector);*/
+	free(sparse_mat->degrees_vector);
 
 	/* free rows and nodes */
-	/*list = sparse_mat -> rows;
-	linked_list = *list;
+	list = sparse_mat -> rows;
 	for (i = 0 ; i < sparse_mat -> dim ; i++){
-		linked_list = *list;
-		node = list->head;
-		while(node -> next != NULL){
-			tmp_node = (node -> next);
-			free(node);
-			node = tmp_node;
-		}
-		free(node);
-		list++;
+		tmp_list = list+1;
+		free_linked_list(list);
+		list = tmp_list;
 	}
 	free(sparse_mat->rows);
-}*/
+	free(sparse_mat);
+}
 
 

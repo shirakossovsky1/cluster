@@ -17,10 +17,10 @@
 
 #include "leading_eigenpair.h"
 
-double calc_modularity_delta(leading_eigenpair* eigenpair);
-double improve_modularity(leading_eigenpair* eigenpair);
-void find_maximal_score(max_in_array *max_score, int group_size, int* unmoved, leading_eigenpair* eigenpair, double q0);
-double calc_final_division(int group_size, max_in_array *max_improvemnt, double *division_vector, int *indices);
+float calc_modularity_delta(leading_eigenpair* eigenpair);
+float improve_modularity(leading_eigenpair* eigenpair);
+void find_maximal_score(max_in_array *max_score, unsigned int group_size, unsigned int* unmoved, leading_eigenpair* eigenpair, float q0);
+float calc_final_division(unsigned int group_size, max_in_array *max_improvemnt, float *division_vector, unsigned int *indices);
 
 
 #endif /* MAXIMIZE_MODULARITY_H_ */

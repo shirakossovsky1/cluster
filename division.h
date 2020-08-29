@@ -11,12 +11,13 @@
 #include "utils.h"
 
 typedef struct division{
-	double 			*division_vector;
+	float 			*division_vector;
 	array 			*g1;
 	array 			*g2;
 } division;
 
-division* create_division(double* division_vector, array* original_subgroup);
+division* create_division(float* division_vector, array* original_subgroup);
 void divide(division *curr_division, array* original_subgroup);
+void free_division(division *division);
 
 #endif /* DIVISION_H_ */

@@ -1,18 +1,18 @@
 FLAGS = -ansi -Wall -Wextra -Werror -pedantic-errors
 LIBS = -lm
 
-all: main.o input_matrix.o modularity_matrix.o leading_eigenpair.o power_iteration.o maximize_modularity.o utils.o division.o
-	gcc main.o input_matrix.o modularity_matrix.o leading_eigenpair.o power_iteration.o maximize_modularity.o utils.o division.o -o cluster $(LIBS)
+all: main.o adjacency_matrix.o modularity_matrix.o leading_eigenpair.o power_iteration.o maximize_modularity.o utils.o division.o error.o
+	gcc main.o adjacency_matrix.o modularity_matrix.o leading_eigenpair.o power_iteration.o maximize_modularity.o utils.o division.o error.o -o cluster $(LIBS)
 clean:
 	rm -rf *.o cluster
 
 main.o: main.c leading_eigenpair.h division.h utils.h 
 	gcc $(FLAGS) -c main.c
 	
-input_matrix.o: utils.h input_matrix.h
-	gcc $(FLAGS) -c input_matrix.c
+adjacency_matrix.o: utils.h error.h adjacency_matrix.h
+	gcc $(FLAGS) -c adjacency_matrix.c
 
-modularity_matrix.o: input_matrix.h modularity_matrix.h
+modularity_matrix.o: adjacency_matrix.h modularity_matrix.h
 	gcc $(FLAGS) -c modularity_matrix.c
 	
 leading_eigenpair.o: modularity_matrix.h power_iteration.h leading_eigenpair.h
@@ -29,4 +29,7 @@ utils.o: utils.h
 	
 division.o: utils.h division.h
 	gcc $(FLAGS) -c division.c
+	
+error.o: error.h
+	gcc $(FLAGS) -c error.c
 	

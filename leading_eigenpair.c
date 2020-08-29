@@ -32,16 +32,14 @@ leading_eigenpair* create_eigenpair(modularity_matrix* mod_matrix) {
 	return eigenpair;
 }
 
-double find_leading_eigenvalue(leading_eigenpair* eigenpair){
-	 double* tmp_vec;
-	 double b;
-	 double c;
-	 int vec_size;
+float find_leading_eigenvalue(leading_eigenpair* eigenpair){
+	 float b, c, *tmp_vec;
+	 unsigned int vec_size;
 
 	 vec_size = eigenpair -> mod_matrix -> sub_vertices_group ->size;
 
 	 /*printf("sub group size is %d\n",vec_size);*/
-	 tmp_vec = (double*)malloc(sizeof(double) * (vec_size));
+	 tmp_vec = (float*)malloc(sizeof(float) * (vec_size));
 	 assert(tmp_vec != NULL);
 
 	 tmp_vec = mult_matrix_by_vector(eigenpair -> mod_matrix, eigenpair -> leading_eigenvector, tmp_vec, vec_size, true);
@@ -57,21 +55,18 @@ double find_leading_eigenvalue(leading_eigenpair* eigenpair){
 	 return ((b / c) - (eigenpair -> mod_matrix -> norm_1));
 }
 
-double* find_leading_eigenvector(modularity_matrix* mod_matrix){
-	double* eigenvector;
+float* find_leading_eigenvector(modularity_matrix* mod_matrix){
+	float* eigenvector;
 
-	eigenvector = (double*)malloc(sizeof(double)*mod_matrix -> sub_vertices_group -> size);
+	eigenvector = (float*)malloc(sizeof(float)*mod_matrix -> sub_vertices_group -> size);
 	power_iteration(mod_matrix, eigenvector);
 
 	return eigenvector;
 }
 
-double* mult_matrix_by_vector(modularity_matrix* mod_matrix, double* vec, double* result_vec, int vec_size, bool to_shift){
-	double result;
-
-	double *vec_ptr;
-	double *next_vec_ptr = result_vec;
-	int curr_row = 0;
+float* mult_matrix_by_vector(modularity_matrix* mod_matrix, float* vec, float* result_vec, unsigned int vec_size, bool to_shift){
+	float result, *vec_ptr, *next_vec_ptr = result_vec;
+	unsigned int curr_row = 0;
 
 	for (vec_ptr=vec; vec_ptr < &vec[vec_size]; vec_ptr++) {
 		result = calc_multiplication(mod_matrix, vec, curr_row, to_shift);
@@ -86,14 +81,12 @@ double* mult_matrix_by_vector(modularity_matrix* mod_matrix, double* vec, double
 
 }
 
-double* calc_division_vector(leading_eigenpair* eigenpair) {
+float* calc_division_vector(leading_eigenpair* eigenpair) {
 
-	double* division_vector;
-	double* division_vector_ptr;
-	double* eigen_vector_ptr;
-	int i;
+	float *division_vector, *division_vector_ptr, *eigen_vector_ptr;
+	unsigned int i;
 
-	division_vector = (double*)malloc(sizeof(double) * eigenpair -> mod_matrix -> sub_vertices_group -> size);
+	division_vector = (float*)malloc(sizeof(float) * eigenpair -> mod_matrix -> sub_vertices_group -> size);
 
 
 	division_vector_ptr = division_vector;
@@ -117,8 +110,7 @@ double* calc_division_vector(leading_eigenpair* eigenpair) {
 void free_leading_eigenpair(leading_eigenpair* eigenpair) {
 
 	free(eigenpair -> leading_eigenvector);
-	free(eigenpair -> division_vector);
-
+	free(eigenpair);
 
 }
 

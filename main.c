@@ -13,7 +13,6 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
-/*#include "modularity_matrix.h"*/
 #include "leading_eigenpair.h"
 #include "maximize_modularity.h"
 #include "division.h"
@@ -22,18 +21,19 @@
 
 int main(int argc, char* argv[]) {
 
-	queue *P, *O;
-	sparse_matrix *input_matrix;
-	int vertices_num, n, i;
-	array *sub_vertices_group, *all_vertices;
-	int *all_vertices_ptr;
+	int n;
+	unsigned int vertices_num, i, *sub_vertices_group_ptr;
+	float modularity_delta;
+	queue *groups_queue, *final_groups_queue;
+	sparse_matrix *adjacency_matrix;
+	array *sub_vertices_group;
 	modularity_matrix* mod_matrix;
 	leading_eigenpair* leading_pair;
-	double modularity_delta, delta_Q;
-	division *curr_division;
+	division *division;
 
 	FILE* input_file;
 	FILE* output_file;
+	char r = 'r';
 
 	/*int vertices[15] = {6,2,1,2,2,0,2,2,0,1,1,4,1,3,0};*/
 
@@ -48,45 +48,42 @@ int main(int argc, char* argv[]) {
 
 	setvbuf(stdout, NULL, _IONBF, 0);
 
-	assert(argc == 3);
+	assert(argc > 0);
 
 	/*fwrite(vertices, sizeof(int), 15, input_file);*/
 
-	n = fread(&vertices_num, sizeof(int), 1, input_file);
-	assert(n == 1);
-	printf("vertices num is %d\n", vertices_num);
+	n = fread(&vertices_num, sizeof(unsigned int), 1, input_file);
+	check_reading_writing(n, 1, r);
 
-	printf("%s\n", "initializing O and P");
-	P = (queue*)calloc(vertices_num, sizeof(queue));
-	P -> list = (linked_list_of_arrays*)calloc(vertices_num, sizeof(linked_list));
-	P -> size = 0;
+	groups_queue = (queue*)calloc(vertices_num, sizeof(queue));
+	groups_queue->list = (linked_list_of_arrays*)calloc(vertices_num, sizeof(linked_list));
+	groups_queue->size = 0;
 
-	all_vertices = (array*)calloc(vertices_num, sizeof(array));
-	all_vertices -> array = (int*)calloc(vertices_num, sizeof(int));
-	all_vertices -> size = vertices_num;
-	all_vertices_ptr = all_vertices -> array;
+	sub_vertices_group = (array*)calloc(vertices_num, sizeof(array));
+	sub_vertices_group->array = (unsigned int*)calloc(vertices_num, sizeof(unsigned int));
+	sub_vertices_group->size = vertices_num;
+	sub_vertices_group_ptr = sub_vertices_group->array;
 
-	for (i = 0; i < all_vertices -> size; i++) {
+	for (i = 0; i < sub_vertices_group->size; i++) {
 		/*printf("i is %d\n", i);*/
-		*all_vertices_ptr = i;
-		all_vertices_ptr++;
+		*sub_vertices_group_ptr = i;
+		sub_vertices_group_ptr++;
 		/*printf("all_vertices_ptr[i] is %d \n", all_vertices->array[i]);*/
 	}
-	push(P, all_vertices);
+	push(groups_queue, sub_vertices_group);
 
-	O = (queue*)calloc(vertices_num, sizeof(queue));
-	O -> list = (linked_list_of_arrays*)calloc(vertices_num, sizeof(linked_list));
-	O -> size = 0;
+	final_groups_queue = (queue*)calloc(vertices_num, sizeof(queue));
+	final_groups_queue->list = (linked_list_of_arrays*)calloc(vertices_num, sizeof(linked_list));
+	final_groups_queue->size = 0;
 
-	input_matrix = read_input_into_sparse(input_file, vertices_num);
+	adjacency_matrix = read_input_into_sparse(input_file, vertices_num);
 	printf("%s\n","finishing read input into sparse");
 
-	modularity_delta = 0.0;
 
-	while (P -> size > 0) {
-		sub_vertices_group = pop(P);
+	while (groups_queue->size > 0) {
+		sub_vertices_group = pop(groups_queue);
 
-		mod_matrix = create_modularity_matrix(input_matrix, sub_vertices_group);
+		mod_matrix = create_modularity_matrix(adjacency_matrix, sub_vertices_group);
 		/*printf("%s\n","finishing create modularity matrix");*/
 
 		leading_pair = create_eigenpair(mod_matrix);
@@ -99,70 +96,84 @@ int main(int argc, char* argv[]) {
 			continue;
 		}*/
 
-		/*printf("%s\n","starting modularity delta");*/
+		printf("%s\n","starting modularity delta");
 
-		modularity_delta = calc_modularity_delta(leading_pair);
+		/*modularity_delta = calc_modularity_delta(leading_pair);*/
 
 		/*printf("modularity_delta is %f\n",modularity_delta);
 		printf("%s\n","finishing modularity delta");*/
 
 		/*if IS_NOT_POSITIVE(modularity_delta){
 			printf("%s\n","modularity delta is negative - moving to next group in g");
-			push(O, sub_vertices_group);
+			push(final_groups_queue, sub_vertices_group);
 			continue;
 		}*/
 
-		delta_Q = improve_modularity(leading_pair);
+		modularity_delta = improve_modularity(leading_pair);
 
-		while (!IS_NOT_POSITIVE(delta_Q)) {
-			delta_Q = improve_modularity(leading_pair); /*algorithm 4*/
+		while (!IS_NOT_POSITIVE(modularity_delta)) {
+			modularity_delta = improve_modularity(leading_pair); /*algorithm 4*/
 		}
 
-		curr_division =  create_division(leading_pair->division_vector, mod_matrix->sub_vertices_group);
+		division = create_division(leading_pair->division_vector, sub_vertices_group);
+
+		free_leading_eigenpair(leading_pair);
+		free_modularity_matrix(mod_matrix);
+		/* free_array(sub_vertices_group); */
 
 		/*handle a case when one sub group is empty*/
-		if (curr_division->g1->size == 0 || curr_division->g2->size == 0) {
-			push(O, sub_vertices_group);
-			printf("added orignal group of size %d to O\n",sub_vertices_group->size);
+		if (division->g1->size == 0) {
+			free_array(division->g1);
+			push(final_groups_queue, division->g2);
+			printf("added orignal group of size %d to final_groups_queue\n",division->g2->size);
+			continue;
+		}
+
+		else if (division->g2->size == 0) {
+			free_array(division->g2);
+			push(final_groups_queue, division->g1);
+			printf("added orignal group of size %d to final_groups_queue\n",division->g1->size);
 			continue;
 		}
 
 		else {
-			if (curr_division -> g1 -> size == 1){
-				push(O, curr_division -> g1);
-				printf("added g1 of size %d to O\n",curr_division -> g1 -> size);
+			if (division->g1->size == 1){
+				push(final_groups_queue, division->g1);
+				printf("added g1 of size %d to O\n",division->g1->size);
 
 			}
 			else {
-				push(P, curr_division -> g1);
-				printf("added g1 of size %d to P\n",curr_division -> g1 -> size);
+				push(groups_queue, division->g1);
+				printf("added g1 of size %d to P\n",division->g1->size);
 			}
-			if (curr_division -> g2 -> size == 1){
-				push(O, curr_division -> g2);
-				printf("added g2 of size %d to O\n",curr_division -> g2 -> size);
+			if (division->g2->size == 1){
+				push(final_groups_queue, division->g2);
+				printf("added g2 of size %d to O\n",division->g2->size);
 			}
 			else {
-				push(P, curr_division -> g2);
-				printf("added g2 of size %d to P\n",curr_division -> g2 -> size);
+				push(groups_queue, division->g2);
+				printf("added g2 of size %d to P\n",division->g2->size);
 			}
 		}
 
-		/*printf("aaaaaaaaaa&&&&&   sub_vertices_group->size is %d\n",sub_vertices_group->size);*/
-		for (i = 0; i < sub_vertices_group->size; i++) {
-			/*printf("division_vector[%d] after optimization = %f\n", i, curr_division ->division_vector[i]);*/
-		}
+		free_division(division);
 
-		printf("size of O is %d, size of P is %d\n",O->size, P->size);
+
+		printf("size of final_groups_queue is %d, size of P is %d\n",final_groups_queue->size, groups_queue->size);
 	}
 
-	create_output_graph(O, output_file);
+	create_output_graph(final_groups_queue, output_file);
+
+	free_queue(groups_queue);
+	free_queue(final_groups_queue);
+	free_sparse_matrix(adjacency_matrix);
 
 	fclose(input_file);
 	fclose(output_file);
 
 	end_time = clock();
 
-	printf("Execution time is %f seconds\n", ((double)(end_time-start_time) / CLOCKS_PER_SEC));
+	printf("Execution time is %f seconds\n", ((float)(end_time-start_time) / CLOCKS_PER_SEC));
 
 	return EXIT_SUCCESS;
 
