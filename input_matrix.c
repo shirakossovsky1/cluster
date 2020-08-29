@@ -23,9 +23,6 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
 
 	linked_list* rows;
 
-	setvbuf(stdout, NULL, _IONBF, 0);
-	fflush(stdout);
-
 	rows = (linked_list*)malloc(sizeof(linked_list) * vertices_num);
 	assert(rows != NULL);
 
@@ -54,7 +51,7 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
 		*degree_vector_ptr = vertex_degree;
 		degree_vector_ptr++;
 
-		printf("degrees_vector[%d] is %d \n", k, degrees_vector[k]);
+		/*printf("degrees_vector[%d] is %d \n", k, degrees_vector[k]);*/
 
 		/*calculate total degrees of the graph*/
 		total_degrees += vertex_degree;
@@ -62,7 +59,7 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, int vertices_num) {
 
 	adjancency_mat -> total_degrees = total_degrees;
 	adjancency_mat -> degrees_vector = degrees_vector;
-	printf("total_degrees = %d\n", adjancency_mat -> total_degrees);
+	/*printf("total_degrees = %d\n", adjancency_mat -> total_degrees);*/
 
 	return adjancency_mat;
 }
@@ -136,7 +133,7 @@ void write_input_matrix(sparse_matrix sparse_mat, FILE* output_file){
 	int row = 0;
 	node *node;
 
-	printf("%s\n","starting");
+	/*printf("%s\n","starting");*/
 	for(row = 0; row < sparse_mat.dim; row++){
 		/*printf("row = %d\n", row);*/
 		fwrite(&row, sizeof(int), 1, output_file);
@@ -152,34 +149,35 @@ void write_input_matrix(sparse_matrix sparse_mat, FILE* output_file){
 	}
 }
 
-void print_degrees_vector(sparse_matrix sparse_mat){
+/*void print_degrees_vector(sparse_matrix sparse_mat){
 	int* degrees_vector;
-	/*int vertex;*/
+	int vertex;
 
 	degrees_vector = sparse_mat.degrees_vector;
 
-	/*printf("%s\n","starting");
+	printf("%s\n","starting");
 	for(vertex = 0; vertex < sparse_mat.dim; vertex++){
 		printf("degree for vertex %d is %d\n", vertex, degrees_vector[vertex]);
-	}*/
-}
+	}
+}*/
 
-void free_sparse_matrix(sparse_matrix *sparse_mat){
+/*void free_sparse_matrix(sparse_matrix *sparse_mat){
 
 	int 		i = 0;
 	node 		*node, *tmp_node;
 	linked_list 	*list, linked_list;
 
+	*/
+
 	/* free degrees vector */
 	/*free(sparse_mat->degrees_vector);*/
 
 	/* free rows and nodes */
-	list = sparse_mat -> rows;
+	/*list = sparse_mat -> rows;
+	linked_list = *list;
 	for (i = 0 ; i < sparse_mat -> dim ; i++){
 		linked_list = *list;
-		/*printf("%d\n",i);*/
 		node = list->head;
-		/*printf("sparse_mat->rows->head = %d\n", node -> matrix_index);*/
 		while(node -> next != NULL){
 			tmp_node = (node -> next);
 			free(node);
@@ -189,6 +187,6 @@ void free_sparse_matrix(sparse_matrix *sparse_mat){
 		list++;
 	}
 	free(sparse_mat->rows);
-}
+}*/
 
 

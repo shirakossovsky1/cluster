@@ -11,15 +11,17 @@ double calc_modularity_delta(leading_eigenpair* eigenpair) {
 
 	double *tmp_vec;
     double b;
+    int vec_size;
+
+    vec_size = eigenpair -> mod_matrix -> sub_vertices_group ->size;
 
     /*printf("division vec[0] is %f\n", eigenpair->division_vector[0]);*/
 
-	tmp_vec = (double*)calloc(sizeof(double), (eigenpair -> mod_matrix -> sub_vertices_group_size));
+	tmp_vec = (double*)calloc(sizeof(double),(vec_size));
 	assert(tmp_vec != NULL);
 
-	tmp_vec = mult_matrix_by_vector(eigenpair -> mod_matrix, eigenpair -> division_vector,
-			tmp_vec, eigenpair -> mod_matrix -> sub_vertices_group_size, false);
-	b = dot_product(eigenpair -> division_vector, tmp_vec, eigenpair -> mod_matrix -> sub_vertices_group_size);
+	tmp_vec = mult_matrix_by_vector(eigenpair -> mod_matrix, eigenpair -> division_vector, tmp_vec, vec_size, false);
+	b = dot_product(eigenpair -> division_vector, tmp_vec, vec_size);
 
 	free(tmp_vec);
 
@@ -38,31 +40,31 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 	max_in_array *max_score, *max_improvemnt;
 
 	double* division_vector = eigenpair->division_vector;
-	int group_size = eigenpair -> mod_matrix -> sub_vertices_group_size;
+	int group_size = eigenpair -> mod_matrix -> sub_vertices_group ->size;
 
-	unmoved = (int*)calloc(sizeof(int), (eigenpair->mod_matrix->sub_vertices_group_size));
+	unmoved = (int*)calloc(sizeof(int), group_size);
 	max_score = (max_in_array*)malloc(sizeof(max_in_array));
 	max_improvemnt = (max_in_array*)malloc(sizeof(max_in_array));
-	max_improvemnt -> array = (double*)calloc(sizeof(double), (eigenpair->mod_matrix->sub_vertices_group_size));
+	max_improvemnt -> array = (double*)calloc(sizeof(double), group_size);
 	max_improvemnt -> max_value = 0.0;
-	indices = (int*)calloc(sizeof(int), (eigenpair->mod_matrix->sub_vertices_group_size));
+	indices = (int*)calloc(sizeof(int), group_size);
 
 	first = true;
 
 	for (i = 0; i < group_size; i++) {
 
-		printf("iteration %d\n", i);
+		/*printf("iteration %d\n", i);*/
 
 		q0 = calc_modularity_delta(eigenpair);
-		printf("q0 is %f\n", q0);
+		/*printf("q0 is %f\n", q0);*/
 
 		find_maximal_score(max_score, group_size, unmoved, eigenpair, q0);
 
-		printf("maximal score is %f with index %d\n", max_score->max_value, max_score->arg_max);
+		/*printf("maximal score is %f with index %d\n", max_score->max_value, max_score->arg_max);*/
 
 		/* moving the vertex with the maximal score to the other group */
 		division_vector[max_score -> arg_max] *= -1.0;
-		printf("the %d vertex was moved\n", max_score -> arg_max);
+		/*printf("the %d vertex was moved\n", max_score -> arg_max);*/
 		indices[i] = max_score -> arg_max;
 		unmoved[max_score -> arg_max] = 1;
 
@@ -74,7 +76,7 @@ double improve_modularity(leading_eigenpair* eigenpair) {
 			max_improvemnt -> array[i] = max_improvemnt -> array[i-1] + max_score->array[max_score -> arg_max];
 		}
 
-		printf("max improvement is %f with index %d\n", max_improvemnt -> array[i], i);
+		/*printf("max improvement is %f with index %d\n", max_improvemnt -> array[i], i);*/
 
 		/* store the max accomulative improvemnt */
 		if (first || max_improvemnt -> array[i] > max_improvemnt -> max_value) {
@@ -103,7 +105,7 @@ void find_maximal_score(max_in_array *max_score, int group_size, int* unmoved, l
 
 	max_score -> max_value = 0.0 - q0;
 
-	max_score -> array = (double*)calloc(sizeof(double), (eigenpair->mod_matrix->sub_vertices_group_size));
+	max_score -> array = (double*)calloc(sizeof(double),group_size);
 
 	/* trying to move each vertex to the other group and store the vretex's score */
 	for (j = 0; j < group_size; j++) {
@@ -111,7 +113,7 @@ void find_maximal_score(max_in_array *max_score, int group_size, int* unmoved, l
 
 			division_vector[j] *= -1.0;
 			curr_q = calc_modularity_delta(eigenpair);
-			printf("modularity delta - inside find max score %f\n", curr_q - q0);
+			/*printf("modularity delta - inside find max score %f\n", curr_q - q0);*/
 
 			/* store the max score and the vertex with the maximal score (which is going to be moved) */
 			if (first || curr_q - q0 >= max_score->max_value) {
@@ -137,14 +139,14 @@ double calc_final_division(int group_size, max_in_array *max_improvemnt, double 
 
 	/* handle case the division is exactly the same */
 	if (max_improvemnt -> arg_max == (group_size -1)) {
-		printf("%s\n", "division is exactly the same");
+		/*printf("%s\n", "division is exactly the same");*/
 		delta_q = 0.0;
 	}
 	else {
 		delta_q = max_improvemnt -> max_value;
 	}
 
-	printf("max_improvemnt -> arg_max is %d\n", max_improvemnt -> arg_max);
+	/*printf("max_improvemnt -> arg_max is %d\n", max_improvemnt -> arg_max);*/
 
 	return delta_q;
 }

@@ -15,14 +15,16 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 	double* next_vec;
 	double* curr_vec;
 	bool first = true;
+	int i;
 
 	double *curr_vec_ptr, *next_vec_ptr, *eigen_vector_ptr;
 
 	int num_rows;
 
-	printf("%s\n","&&&&&&&&& starting power interation file &&&&&&&&&&");
+	/*printf("%s\n","&&&&&&&&& starting power interation file &&&&&&&&&&");*/
 
-	num_rows = mod_matrix -> sub_vertices_group_size;
+	num_rows = mod_matrix -> sub_vertices_group ->size;
+	i = 0;
 
 	vec_0 = (double*) calloc(num_rows, sizeof(double));
 	curr_vec = (double*) calloc(num_rows, sizeof(double));
@@ -32,7 +34,7 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 
 	curr_vec_ptr = curr_vec;
 
-	printf("%s\n","creating b0");
+	/*printf("%s\n","creating b0");*/
 	vec_0 = generate_rand_vec(vec_0,num_rows);
 	/*vec_0[0] = 1.0;
 	vec_0[1] = 1.0;
@@ -45,11 +47,11 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 	}
 	vec_0_ptr = vec_0;*/
 
-	printf("%s\n","get next bk first");
-	get_next_vec(mod_matrix, vec_0, next_vec, mod_matrix->sub_vertices_group_size);
+	/*printf("%s\n","get next bk first");*/
+	get_next_vec(mod_matrix, vec_0, next_vec, num_rows);
 
-	printf("%s\n","starting iterative power iteration");
-	while (first || (smaller_than_eps(curr_vec, next_vec, num_rows) != 1)) {
+	/*printf("%s\n","starting iterative power iteration");*/
+	while (first || (smaller_than_eps(curr_vec, next_vec, num_rows) != 1 && (i < 1000000))) {
 		first = false;
 		curr_vec_ptr = curr_vec;
 		next_vec_ptr = next_vec;
@@ -58,23 +60,24 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 				*curr_vec_ptr = *next_vec_ptr;
 				curr_vec_ptr++;
 			}
-		get_next_vec(mod_matrix, curr_vec, next_vec, mod_matrix->sub_vertices_group_size);
+		get_next_vec(mod_matrix, curr_vec, next_vec, num_rows);
+		/*i++;*/
 	}
 
 	next_vec_ptr = next_vec;
 
-	printf("\n%s","eigenvector vector is ");
+	/*printf("\n%s","eigenvector vector is ");*/
 	for (next_vec_ptr=next_vec ; next_vec_ptr <= &next_vec[num_rows-1] ; next_vec_ptr++){
 			*eigen_vector_ptr = *next_vec_ptr;
-			printf("%f, ",*eigen_vector_ptr);
+			/*printf("%f, ",*eigen_vector_ptr);*/
 			eigen_vector_ptr++;
 		}
-	printf("\n");
+	/*printf("\n");*/
 
 	free(vec_0);
 	free(curr_vec);
 
-	printf("%s\n","&&&&&&&&& finishing power interation file &&&&&&&&&&");
+	/*printf("%s\n","&&&&&&&&& finishing power interation file &&&&&&&&&&");*/
 
 	return;
 
@@ -83,12 +86,12 @@ void power_iteration(modularity_matrix* mod_matrix, double* eigen_vector) {
 double* generate_rand_vec(double* vec_0, int vec_size) {
 	double* vec_0_ptr;
 
-	printf("\n%s","vec 0 is ");
+	/*printf("\n%s","vec 0 is ");*/
 	for (vec_0_ptr=vec_0 ; vec_0_ptr < &vec_0[vec_size] ; vec_0_ptr++){
 		*vec_0_ptr = rand()%10;
-		printf("%f, ",*vec_0_ptr);
+		/*printf("%f, ",*vec_0_ptr);*/
 	}
-	printf("\n");
+	/*printf("\n");*/
 
 	return vec_0;
 
@@ -127,7 +130,7 @@ void get_next_vec(modularity_matrix* mod_matrix, double* vec, double* next_vec, 
  	}
 	vec_norm = sqrt(vec_norm);
 
-	printf("norm is %f\n",vec_norm);
+	/*printf("norm is %f\n",vec_norm);*/
 
 	/*printf("\n%s","vector is ");*/
 	for (next_vec_ptr=next_vec; next_vec_ptr <= &next_vec[vec_size-1]; next_vec_ptr++){
@@ -149,7 +152,7 @@ double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row, 
 	double *vec_ptr;
 	int row_in_original_matrix;
 
-	row_in_original_matrix = mod_matrix->sub_vertices_group[row];
+	row_in_original_matrix = mod_matrix->sub_vertices_group->array[row];
 
 
 	vec_ptr = vec;
@@ -167,7 +170,7 @@ double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row, 
 	/*printf("2 - vec_ptr[0] = %f\n",vec_ptr[0]);
 	printf("2 - vec_ptr[1] = %f\n",vec_ptr[1]);
 	printf("2 - vec_ptr[2] = %f\n",vec_ptr[2]);*/
-	b = (double)(mod_matrix->degrees_vector[row_in_original_matrix]) * int_dot_product(mod_matrix -> sub_degrees_vector, vec_ptr, mod_matrix -> sub_vertices_group_size)
+	b = (double)(mod_matrix->degrees_vector[row_in_original_matrix]) * int_dot_product(mod_matrix -> sub_degrees_vector, vec_ptr, mod_matrix -> sub_vertices_group ->size)
 			/ (double)mod_matrix->total_degrees_num;
 	/*c = mod_matrix->vertices_mod_vec[row] * sum_vec(vec, mod_matrix -> sub_vertices_group_size);*/
 
@@ -177,12 +180,12 @@ double calc_multiplication(modularity_matrix* mod_matrix, double *vec, int row, 
 	printf("3 - vec_ptr[2] = %f\n",vec_ptr[2]);*/
 	if (to_shift) {
 		/*printf("%s\n","shifting");*/
-		d = vec_ptr[row] * ((mod_matrix -> norm_1) - mod_matrix->vertices_mod_vec[row_in_original_matrix]);
+		d = vec_ptr[row] * ((mod_matrix -> norm_1) - mod_matrix->vertices_mod_vec[row]);
 	}
 	else {
 		/*printf("vec_ptr[row] = %f\n",vec_ptr[row]);
 		printf("mod_matrix->vertices_mod_vec[row] = %f\n",mod_matrix->vertices_mod_vec[row]);*/
-		d = -1.0 * (vec_ptr[row] * (mod_matrix->vertices_mod_vec[row_in_original_matrix]));
+		d = -1.0 * (vec_ptr[row] * (mod_matrix->vertices_mod_vec[row]));
 	}
 
 	result = a - b + d;
@@ -205,11 +208,11 @@ double mult_sparse_mat_row_by_vec(modularity_matrix* mod_matrix, double *vec, in
 	double				*vec_ptr;
 
 	vec_ptr = vec;
-	sub_vertices_group_ptr = mod_matrix -> sub_vertices_group;
+	sub_vertices_group_ptr = mod_matrix -> sub_vertices_group->array;
 
 	neighbor_ptr = mod_matrix -> adjacency_matrix -> rows[row].head;
 
-	while (*sub_vertices_group_ptr <= mod_matrix -> sub_vertices_group[mod_matrix -> sub_vertices_group_size-1] &&
+	while (*sub_vertices_group_ptr <= mod_matrix -> sub_vertices_group->array[(mod_matrix -> sub_vertices_group ->size)-1] &&
 			neighbor_ptr != NULL) {
 
 		/*printf("curr neighbor is %d\n ",neighbor_ptr->matrix_index);

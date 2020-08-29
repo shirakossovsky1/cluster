@@ -2,9 +2,9 @@ FLAGS = -ansi -Wall -Wextra -Werror -pedantic-errors
 LIBS = -lm
 
 all: main.o input_matrix.o modularity_matrix.o leading_eigenpair.o power_iteration.o maximize_modularity.o utils.o division.o
-	gcc main.o input_matrix.o modularity_matrix.o leading_eigenpair.o power_iteration.o maximize_modularity.o utils.o division.o -o run $(LIBS)
+	gcc main.o input_matrix.o modularity_matrix.o leading_eigenpair.o power_iteration.o maximize_modularity.o utils.o division.o -o cluster $(LIBS)
 clean:
-	rm -rf *.o run
+	rm -rf *.o cluster
 
 main.o: main.c leading_eigenpair.h division.h utils.h 
 	gcc $(FLAGS) -c main.c

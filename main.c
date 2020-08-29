@@ -22,14 +22,10 @@
 
 int main(int argc, char* argv[]) {
 
-	queue *P;
-	queue *O;
+	queue *P, *O;
 	sparse_matrix *input_matrix;
-	int vertices_num;
-	int n;
-	int i;
-	array* sub_vertices_group;
-	array *all_vertices;
+	int vertices_num, n, i;
+	array *sub_vertices_group, *all_vertices;
 	int *all_vertices_ptr;
 	modularity_matrix* mod_matrix;
 	leading_eigenpair* leading_pair;
@@ -57,56 +53,8 @@ int main(int argc, char* argv[]) {
 	/*fwrite(vertices, sizeof(int), 15, input_file);*/
 
 	n = fread(&vertices_num, sizeof(int), 1, input_file);
-	/*assert(n == 1);*/
+	assert(n == 1);
 	printf("vertices num is %d\n", vertices_num);
-
-	/*printf("%s\n","starting read input into sparse");
-
-	input_matrix = read_input_into_sparse(input_file, vertices_num);
-	print_degrees_vector(*input_matrix);
-	printf("%s\n","finishing read input into sparse");
-
-	write_input_matrix(*input_matrix, output_file);
-	printf("%s\n","finishing write input");
-
-	sub_vertices_group = (int*)calloc(vertices_num, sizeof(int));
-	sub_vertices_group_ptr = sub_vertices_group;
-
-	for (i = 0; i < vertices_num; i++) {
-		*sub_vertices_group_ptr = i;
-		sub_vertices_group_ptr++;
-		printf("sub_vertices_group[i] is %d \n", sub_vertices_group[i]);
-	}
-
-	mod_matrix = create_modularity_matrix(input_matrix, sub_vertices_group, vertices_num);
-	printf("%s\n","finishing create modularity matrix");
-
-	leading_pair = create_eigenpair(mod_matrix);
-	printf("%s\n","finishing eigenpair");
-
-	printf("%s\n","starting modularity delta");
-
-	modularity_delta = calc_modularity_delta(leading_pair);
-
-	printf("modularity_delta is %f\n",modularity_delta);
-	printf("%s\n","finishing modularity delta");
-
-	fclose(input_file);
-	fclose(output_file);
-
-	end_time = clock();
-
-	printf("Execution time is %f seconds\n", ((double)(end_time-start_time) / CLOCKS_PER_SEC));
-
-	free_sparse_matrix(input_matrix);
-	free_modularity_matrix(mod_matrix);
-
-	free_leading_eigenpair(leading_pair);
-	free(leading_pair);
-	free(input_matrix);
-	free(mod_matrix);
-
-	return EXIT_SUCCESS; */
 
 	printf("%s\n", "initializing O and P");
 	P = (queue*)calloc(vertices_num, sizeof(queue));
@@ -133,44 +81,44 @@ int main(int argc, char* argv[]) {
 	input_matrix = read_input_into_sparse(input_file, vertices_num);
 	printf("%s\n","finishing read input into sparse");
 
+	modularity_delta = 0.0;
 
 	while (P -> size > 0) {
 		sub_vertices_group = pop(P);
 
-		mod_matrix = create_modularity_matrix(input_matrix, sub_vertices_group->array, sub_vertices_group->size);
-		printf("%s\n","finishing create modularity matrix");
+		mod_matrix = create_modularity_matrix(input_matrix, sub_vertices_group);
+		/*printf("%s\n","finishing create modularity matrix");*/
 
 		leading_pair = create_eigenpair(mod_matrix);
-		printf("%s\n","finishing eigenpair");
+		/*printf("%s\n","finishing eigenpair");*/
 
 
-		if IS_NOT_POSITIVE(leading_pair->leading_eigenvalue){
+		/*if IS_NOT_POSITIVE(leading_pair->leading_eigenvalue){
 			printf("%s\n","eigenvalue is negative - moving to next group in g");
 			push(O, sub_vertices_group);
 			continue;
-		}
+		}*/
 
-		printf("%s\n","starting modularity delta");
+		/*printf("%s\n","starting modularity delta");*/
 
 		modularity_delta = calc_modularity_delta(leading_pair);
 
-		printf("modularity_delta is %f\n",modularity_delta);
-		printf("%s\n","finishing modularity delta");
+		/*printf("modularity_delta is %f\n",modularity_delta);
+		printf("%s\n","finishing modularity delta");*/
 
-		if IS_NOT_POSITIVE(modularity_delta){
+		/*if IS_NOT_POSITIVE(modularity_delta){
 			printf("%s\n","modularity delta is negative - moving to next group in g");
 			push(O, sub_vertices_group);
 			continue;
-		}
+		}*/
 
-		delta_Q = modularity_delta;
+		delta_Q = improve_modularity(leading_pair);
 
 		while (!IS_NOT_POSITIVE(delta_Q)) {
 			delta_Q = improve_modularity(leading_pair); /*algorithm 4*/
 		}
 
-		curr_division =  create_division(leading_pair->division_vector, mod_matrix->sub_vertices_group,
-				mod_matrix->sub_vertices_group_size);
+		curr_division =  create_division(leading_pair->division_vector, mod_matrix->sub_vertices_group);
 
 		/*handle a case when one sub group is empty*/
 		if (curr_division->g1->size == 0 || curr_division->g2->size == 0) {
@@ -199,9 +147,9 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		printf("aaaaaaaaaa&&&&&   sub_vertices_group->size is %d\n",sub_vertices_group->size);
+		/*printf("aaaaaaaaaa&&&&&   sub_vertices_group->size is %d\n",sub_vertices_group->size);*/
 		for (i = 0; i < sub_vertices_group->size; i++) {
-			printf("division_vector[%d] after optimization = %f\n", i, curr_division ->division_vector[i]);
+			/*printf("division_vector[%d] after optimization = %f\n", i, curr_division ->division_vector[i]);*/
 		}
 
 		printf("size of O is %d, size of P is %d\n",O->size, P->size);

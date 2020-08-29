@@ -16,7 +16,7 @@ typedef struct division{
 	array 			*g2;
 } division;
 
-division* create_division(double* division_vector, int* original_sugroup, int original_sugroup_size);
-void divide(division *curr_division, int* original_sugroup, int original_sugroup_size);
+division* create_division(double* division_vector, array* original_subgroup);
+void divide(division *curr_division, array* original_subgroup);
 
 #endif /* DIVISION_H_ */
