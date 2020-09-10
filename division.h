@@ -1,8 +1,6 @@
 /*
- * division.h
- *
- *  Created on: 22 Aug 2020
- *      Author: shira
+ * The module represents the division of the given group into 2 sub-groups,
+ * based on the optimized division vector.
  */
 
 #ifndef DIVISION_H_
@@ -10,6 +8,10 @@
 
 #include "utils.h"
 
+/* division object
+	division_vector - vector which represents the division indices based on the leading eigenvector (s).
+	g1, g2 - the new sub-groups implemented by an array object.
+ */
 typedef struct division{
 	float 			*division_vector;
 	array 			*g1;

@@ -1,12 +1,5 @@
-/*
- * leading_eigenpair.c
- *
- *  Created on: 16 Aug 2020
- *      Author: shira
- */
 
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -14,48 +7,21 @@
 
 #include "leading_eigenpair.h"
 
+/* main function which calculates all eigenpair properties into eigenpair object */
 leading_eigenpair* create_eigenpair(modularity_matrix* mod_matrix) {
 	leading_eigenpair* eigenpair = (leading_eigenpair*)malloc(sizeof(leading_eigenpair));
 
-	/*printf("%s\n","&&&&&&&&& starting inside eigenpair file &&&&&&&&&");*/
-
 	eigenpair -> mod_matrix = mod_matrix;
 	eigenpair -> leading_eigenvector = find_leading_eigenvector(mod_matrix);
-	/*printf("eigenpair -> mod_matrix -> sub_vertices_group_size is %d\n",eigenpair -> mod_matrix -> sub_vertices_group ->size);
-	printf("%s\n","finding leading eigenvalue");*/
 	eigenpair -> leading_eigenvalue = find_leading_eigenvalue(eigenpair);
-	/*printf("%s\n","calc division vector");*/
 	eigenpair -> division_vector = calc_division_vector(eigenpair);
-
-	/*printf("%s\n","&&&&&&&&& finishing inside eigenpair file &&&&&&&&&");*/
 
 	return eigenpair;
 }
 
-float find_leading_eigenvalue(leading_eigenpair* eigenpair){
-	 float b, c, *tmp_vec;
-	 unsigned int vec_size;
-
-	 vec_size = eigenpair -> mod_matrix -> sub_vertices_group ->size;
-
-	 /*printf("sub group size is %d\n",vec_size);*/
-	 tmp_vec = (float*)malloc(sizeof(float) * (vec_size));
-	 assert(tmp_vec != NULL);
-
-	 tmp_vec = mult_matrix_by_vector(eigenpair -> mod_matrix, eigenpair -> leading_eigenvector, tmp_vec, vec_size, true);
-	 b = dot_product(eigenpair -> leading_eigenvector, tmp_vec, vec_size);
-	 c = dot_product(eigenpair -> leading_eigenvector, eigenpair -> leading_eigenvector, vec_size);
-
-	 free(tmp_vec);
-	 /*printf("norm 1 is %f\n",eigenpair -> mod_matrix -> norm_1);
-	 printf("b is %f\n",b);
-	 printf("c is %f\n",c);
-	 printf("leading eigenvalue is (after substracting norm) %f\n",((b / c) - (eigenpair -> mod_matrix -> norm_1)));*/
-
-	 return ((b / c) - (eigenpair -> mod_matrix -> norm_1));
-}
-
+/* calculate leading eigenvector using power iteration process */
 float* find_leading_eigenvector(modularity_matrix* mod_matrix){
+
 	float* eigenvector;
 
 	eigenvector = (float*)malloc(sizeof(float)*mod_matrix -> sub_vertices_group -> size);
@@ -64,31 +30,34 @@ float* find_leading_eigenvector(modularity_matrix* mod_matrix){
 	return eigenvector;
 }
 
-float* mult_matrix_by_vector(modularity_matrix* mod_matrix, float* vec, float* result_vec, unsigned int vec_size, bool to_shift){
-	float result, *vec_ptr, *next_vec_ptr = result_vec;
-	unsigned int curr_row = 0;
+/* calculate leading eigenvalue based on the leading eigenvector */
+float find_leading_eigenvalue(leading_eigenpair* eigenpair){
 
-	for (vec_ptr=vec; vec_ptr < &vec[vec_size]; vec_ptr++) {
-		result = calc_multiplication(mod_matrix, vec, curr_row, to_shift);
-		/**vec_ptr = *next_vec_ptr;*/
-		*next_vec_ptr = result;
-		/*printf("result is %f\n",result);*/
-		next_vec_ptr++;
-		curr_row++;
- 	}
+	float numerator, denominator, *tmp_vec;
+	unsigned int vec_size;
 
-	return result_vec;
+	vec_size = eigenpair -> mod_matrix -> sub_vertices_group ->size;
+	tmp_vec = (float*)malloc(sizeof(float) * (vec_size));
 
+	tmp_vec = mult_matrix_by_vector(eigenpair -> mod_matrix, eigenpair -> leading_eigenvector,
+			tmp_vec, vec_size, true, true);
+	numerator = float_dot_product(eigenpair -> leading_eigenvector, tmp_vec, vec_size);
+	denominator = float_dot_product(eigenpair -> leading_eigenvector, eigenpair -> leading_eigenvector,
+			vec_size);
+	check_float_division_by_zero(denominator);
+
+	free(tmp_vec);
+
+	return ((numerator / denominator) - (eigenpair -> mod_matrix -> norm_1));
 }
 
+/* calcualte the vector which represents the division indices based on the leading eigenvector (s) */
 float* calc_division_vector(leading_eigenpair* eigenpair) {
 
 	float *division_vector, *division_vector_ptr, *eigen_vector_ptr;
 	unsigned int i;
 
 	division_vector = (float*)malloc(sizeof(float) * eigenpair -> mod_matrix -> sub_vertices_group -> size);
-
-
 	division_vector_ptr = division_vector;
 	eigen_vector_ptr = eigenpair -> leading_eigenvector;
 
@@ -99,7 +68,6 @@ float* calc_division_vector(leading_eigenpair* eigenpair) {
 		else {
 			*division_vector_ptr = -1.0;
 		}
-		/*printf("division_vector[%d] = %f\n",i,*division_vector_ptr);*/
 		division_vector_ptr++;
 		eigen_vector_ptr++;
 	}
@@ -107,11 +75,11 @@ float* calc_division_vector(leading_eigenpair* eigenpair) {
 	return division_vector;
 }
 
+/* free memory of eigenpair object */
 void free_leading_eigenpair(leading_eigenpair* eigenpair) {
 
 	free(eigenpair -> leading_eigenvector);
 	free(eigenpair);
-
 }
 
 

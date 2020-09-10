@@ -1,12 +1,7 @@
-/*
- * utils.c
- *
- *  Created on: 22 Aug 2020
- *      Author: shira
- */
 
 #include "utils.h"
 
+/* remove and return the first item in the queue */
 array* pop(struct queue *queue) {
 
 	node_of_array *first_node, *second_node;
@@ -25,12 +20,15 @@ array* pop(struct queue *queue) {
 		second_node = first_node->next;
 		queue->list->head = second_node;
 	}
+
 	result = first_node->data;
 	free(first_node);
 	queue->size -= 1;
+
 	return result;
 }
 
+/* add a new item to the queue */
 void push(struct queue *queue, array* item) {
 
 	node_of_array *new_node, *last_node;
@@ -49,69 +47,81 @@ void push(struct queue *queue, array* item) {
 
 	queue->list->tail = new_node;
 	queue->size += 1;
+
 	return;
 }
 
+/* write the graph final division into binary file */
 void create_output_graph(queue *O, FILE* output_file){
-	unsigned int i, size_of_subgroup;
+	unsigned int i, n, size_of_subgroup;
 	node_of_array *curr_node_array;
 
-	fwrite(&(O->size), sizeof(int), 1, output_file);
+	n = fwrite(&(O->size), sizeof(int), 1, output_file);
+	check_reading_writing(n, 1, 'w');
 
 	curr_node_array = O->list->head;
 	for (i = 0; i < O->size; i++) {
 		size_of_subgroup = curr_node_array ->data->size;
-		fwrite(&size_of_subgroup, sizeof(unsigned int), 1, output_file);
-		fwrite((curr_node_array->data->array), sizeof(unsigned int), size_of_subgroup, output_file);
+		n = fwrite(&size_of_subgroup, sizeof(unsigned int), 1, output_file);
+		check_reading_writing(n, 1, 'w');
+		n = fwrite((curr_node_array->data->array), sizeof(unsigned int), size_of_subgroup, output_file);
+		check_reading_writing(n, size_of_subgroup, 'w');
 		curr_node_array = curr_node_array->next;
-		/*for (j = 0; j < size_of_subgroup; j++) {
-			fwrite((curr_node_array->data->array), sizeof(int), size_of_subgroup, output_file);*/
 	}
 }
 
+/* free memory of array object */
 void free_array(array *array){
-	unsigned int i;
-	for (i=0; i < array->size;i++){
-	}
+
 	free(array->array);
 	free(array);
 }
 
+/* free memory of queue object */
 void free_queue(queue *queue){
+
 	free_linked_list_of_arrays(queue->list);
 	free(queue);
 }
 
+/* free memory of linked list of arrays object */
 void free_linked_list_of_arrays(linked_list_of_arrays *linked_list){
-	node_of_array *node,*tmp_node;
 
+	node_of_array *node,*tmp_node;
 	node = linked_list->head;
+
 	while(node != NULL){
 		tmp_node = node;
 		node = node->next;
 		free_node_of_array(tmp_node);
 	}
+
 	free(linked_list);
 }
 
+/* free memory of node of array object */
 void free_node_of_array(node_of_array *node){
+
 	free_array(node->data);
 	free(node);
 }
 
+/* free memory of max in array object */
 void free_max_in_array(max_in_array *max_in_array) {
+
 	free(max_in_array->array);
 	free(max_in_array);
 }
 
+/* free memory of linked list object */
 void free_linked_list(linked_list *linked_list) {
-	node 	*node, *tmp_node;
 
+	node 	*node, *tmp_node;
 	node = linked_list->head;
+
 	while(node != NULL){
 		tmp_node = node;
 		node = node->next;
 		free(tmp_node);
 	}
 }
-
