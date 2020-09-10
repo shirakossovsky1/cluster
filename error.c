@@ -7,7 +7,7 @@
 void check_input_file(FILE* input_file) {
 	if (input_file == NULL) {
 		printf("%s\n", "Corrupted file, exiting program");
-		EXIT_FAILURE;
+		exit(1);
 	}
 	return;
 }
@@ -16,7 +16,7 @@ void check_input_file(FILE* input_file) {
 void check_variables(int argc) {
 	if (argc == 0) {
 		printf("%s\n", "Progrem didn't recieve any variables, exiting program");
-		EXIT_FAILURE;
+		exit(1);
 	}
 	return;
 }
@@ -25,7 +25,7 @@ void check_variables(int argc) {
 void check_float_division_by_zero(float number) {
 	if (number == 0.0) {
 		printf("%s\n", "Dividing by zero, exiting program");
-		EXIT_FAILURE;
+		exit(1);
 	}
 	return;
 }
@@ -34,7 +34,7 @@ void check_float_division_by_zero(float number) {
 void check_int_division_by_zero(unsigned int number) {
 	if (number == 0) {
 		printf("%s\n", "Dividing by zero, exiting program");
-		EXIT_FAILURE;
+		exit(1);
 	}
 	return;
 }
@@ -48,7 +48,7 @@ void check_reading_writing(int number, int expected, char c) {
 		else if (c == 'w') {
 			printf("Wrote %d objects instead of %d objects, exiting program\n", number, expected);
 		}
-		EXIT_FAILURE;
+		exit(1);
 	}
 	return;
 }
