@@ -56,7 +56,7 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 				curr_vec_ptr++;
 			}
 		get_next_vec(mod_matrix, curr_vec, next_vec, num_rows);
-		/*i++;*/
+		i++;
 	}
 
 	next_vec_ptr = next_vec;

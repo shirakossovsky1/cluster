@@ -13,10 +13,10 @@
 
 sparse_matrix* read_input_into_sparse(FILE* input_file, unsigned int vertices_num) {
 	unsigned int k = 0, n = 0, vertex_degree, total_degrees = 0, *degrees_vector, *degree_vector_ptr;
-	linked_list *curr_row, *rows, *curr_list;
+	linked_list *curr_row, *rows;
 	sparse_matrix *adjancency_mat;
 
-	rows = (linked_list*)malloc(sizeof(linked_list) * vertices_num);
+	rows = (linked_list*)calloc(sizeof(linked_list), vertices_num);
 	assert(rows != NULL);
 
 	degrees_vector = (unsigned int*)calloc(sizeof(unsigned int), vertices_num);
@@ -36,10 +36,10 @@ sparse_matrix* read_input_into_sparse(FILE* input_file, unsigned int vertices_nu
 		n = fread(&vertex_degree, sizeof(unsigned int), 1, input_file);
 		check_reading_writing(n, 1, 'r');
 
-		curr_list = (linked_list*)malloc(sizeof(linked_list));
+		/*curr_list = (linked_list*)malloc(sizeof(linked_list));*/
 
-		add_row(input_file, vertex_degree,curr_list);
-		*curr_row = *curr_list;
+		add_row(input_file, vertex_degree,curr_row);
+		/**curr_row = *curr_list;*/
 
 		curr_row++;
 
@@ -159,7 +159,7 @@ void write_input_matrix(sparse_matrix sparse_mat, FILE* output_file){
 void free_sparse_matrix(sparse_matrix *sparse_mat){
 
 	unsigned int 	i = 0;
-	linked_list 	*list, *tmp_list;
+	linked_list 	*list;
 
 	/* free degrees vector */
 	free(sparse_mat->degrees_vector);
@@ -167,9 +167,13 @@ void free_sparse_matrix(sparse_matrix *sparse_mat){
 	/* free rows and nodes */
 	list = sparse_mat -> rows;
 	for (i = 0 ; i < sparse_mat -> dim ; i++){
-		tmp_list = list+1;
+		/*tmp_list = list+1;*/
+		list = &sparse_mat->rows[i];
 		free_linked_list(list);
-		list = tmp_list;
+		/*printf("%s\n","trying to free the list");
+		free(list);
+		printf("%s\n","succeeded");*/
+		/*list = tmp_list;*/
 	}
 	free(sparse_mat->rows);
 	free(sparse_mat);

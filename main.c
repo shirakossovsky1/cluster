@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 	/*int vertices[15] = {6,2,1,2,2,0,2,2,0,1,1,4,1,3,0};*/
 
 	/*pre-process inputs before reading input into sparse matrix*/
-	clock_t	start_time, end_time;
+	clock_t	start_time, end_time, max_end_time;
 
 	input_file = fopen(argv[1], "r");
 	assert(input_file != NULL);
@@ -77,13 +77,14 @@ int main(int argc, char* argv[]) {
 	final_groups_queue->size = 0;
 
 	adjacency_matrix = read_input_into_sparse(input_file, vertices_num);
-	printf("%s\n","finishing read input into sparse");
+	/*printf("%s\n","finishing read input into sparse");*/
 
 
 	while (groups_queue->size > 0) {
 		sub_vertices_group = pop(groups_queue);
 
 		mod_matrix = create_modularity_matrix(adjacency_matrix, sub_vertices_group);
+
 		/*printf("%s\n","finishing create modularity matrix");*/
 
 		leading_pair = create_eigenpair(mod_matrix);
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]) {
 			continue;
 		}*/
 
-		printf("%s\n","starting modularity delta");
+		/*printf("%s\n","starting modularity delta");*/
 
 		/*modularity_delta = calc_modularity_delta(leading_pair);*/
 
@@ -109,11 +110,17 @@ int main(int argc, char* argv[]) {
 			continue;
 		}*/
 
+		end_time = clock();
+
 		modularity_delta = improve_modularity(leading_pair);
 
 		while (!IS_NOT_POSITIVE(modularity_delta)) {
 			modularity_delta = improve_modularity(leading_pair); /*algorithm 4*/
 		}
+
+		max_end_time = clock();
+
+		printf("maximize modularity execution took %f\n", ((float)(max_end_time-end_time) / CLOCKS_PER_SEC));
 
 		division = create_division(leading_pair->division_vector, sub_vertices_group);
 
@@ -125,41 +132,39 @@ int main(int argc, char* argv[]) {
 		if (division->g1->size == 0) {
 			free_array(division->g1);
 			push(final_groups_queue, division->g2);
-			printf("added orignal group of size %d to final_groups_queue\n",division->g2->size);
-			continue;
+			/*printf("added orignal group of size %d to final_groups_queue\n",division->g2->size);*/
 		}
 
 		else if (division->g2->size == 0) {
 			free_array(division->g2);
 			push(final_groups_queue, division->g1);
-			printf("added orignal group of size %d to final_groups_queue\n",division->g1->size);
-			continue;
+			/*printf("added orignal group of size %d to final_groups_queue\n",division->g1->size);*/
 		}
 
 		else {
 			if (division->g1->size == 1){
 				push(final_groups_queue, division->g1);
-				printf("added g1 of size %d to O\n",division->g1->size);
+				/*printf("added g1 of size %d to O\n",division->g1->size);*/
 
 			}
 			else {
 				push(groups_queue, division->g1);
-				printf("added g1 of size %d to P\n",division->g1->size);
+				/*printf("added g1 of size %d to P\n",division->g1->size);*/
 			}
 			if (division->g2->size == 1){
 				push(final_groups_queue, division->g2);
-				printf("added g2 of size %d to O\n",division->g2->size);
+				/*printf("added g2 of size %d to O\n",division->g2->size);*/
 			}
 			else {
 				push(groups_queue, division->g2);
-				printf("added g2 of size %d to P\n",division->g2->size);
+				/*printf("added g2 of size %d to P\n",division->g2->size);*/
 			}
 		}
 
 		free_division(division);
 
 
-		printf("size of final_groups_queue is %d, size of P is %d\n",final_groups_queue->size, groups_queue->size);
+		/*printf("size of final_groups_queue is %d, size of P is %d\n",final_groups_queue->size, groups_queue->size);*/
 	}
 
 	create_output_graph(final_groups_queue, output_file);

@@ -71,11 +71,8 @@ void create_output_graph(queue *O, FILE* output_file){
 
 void free_array(array *array){
 	unsigned int i;
-	printf("%s","array is ");
 	for (i=0; i < array->size;i++){
-		printf("%d ",array->array[i]);
 	}
-	printf("%s","\n");
 	free(array->array);
 	free(array);
 }
@@ -108,7 +105,7 @@ void free_max_in_array(max_in_array *max_in_array) {
 }
 
 void free_linked_list(linked_list *linked_list) {
-	node 			*node, *tmp_node;
+	node 	*node, *tmp_node;
 
 	node = linked_list->head;
 	while(node != NULL){
@@ -116,7 +113,5 @@ void free_linked_list(linked_list *linked_list) {
 		node = node->next;
 		free(tmp_node);
 	}
-
-	/*free(linked_list);*/
 }
 
