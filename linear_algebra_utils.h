@@ -21,5 +21,4 @@ float float_dot_product(float* vector_1, float* vector_2, unsigned int vec_size)
 float int_dot_product(unsigned int* vector_1, float* vector_2, unsigned int vec_size);
 float sum_vec(float* vector, unsigned int vec_size);
 
-
 #endif /* LINEAR_ALGEBRA_UTILS_H_ */

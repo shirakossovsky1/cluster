@@ -17,16 +17,16 @@
 	norm_1 - used to shift the matrix for finding eigenpair process (||C||1).
  */
 typedef struct modularity_matrix{
-	sparse_matrix 	*adjacency_matrix; /* A as a sparse matrix */
-	unsigned int 	total_degrees_num;
-	unsigned int 	*degrees_vector;
-	array			*sub_vertices_group; /* g */
-	unsigned int 	*sub_degrees_vector;
-	float 			*vertices_mod_vec;
-	float 			norm_1;
+	const sparse_matrix 	*adjacency_matrix; /* A as a sparse matrix */
+	unsigned int 			total_degrees_num;
+	const unsigned int 		*degrees_vector;
+	array					*sub_vertices_group; /* g */
+	unsigned int 			*sub_degrees_vector;
+	float 					*vertices_mod_vec;
+	float 					norm_1;
 } modularity_matrix;
 
-modularity_matrix* create_modularity_matrix(sparse_matrix *adjacency_matrix, array* sub_vertices_group);
+modularity_matrix* create_modularity_matrix(const sparse_matrix *adjacency_matrix, array* sub_vertices_group);
 unsigned int* calc_sub_degrees_vector(array* sub_vertices_group, modularity_matrix* mod_matrix);
 float* calc_vertices_mod_vec(modularity_matrix* mod_matrix);
 float get_total_expected_degree(unsigned int vertex_degree, modularity_matrix* mod_matrix, array* sub_vertices_group);

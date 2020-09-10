@@ -3,7 +3,7 @@
 #include "modularity_matrix.h"
 
 /* main function which calculates all modularity matrix properties into modularity matrix object. */
-modularity_matrix* create_modularity_matrix(sparse_matrix *adjacency_matrix, array *sub_vertices_group) {
+modularity_matrix* create_modularity_matrix(const sparse_matrix *adjacency_matrix, array *sub_vertices_group) {
 
 	modularity_matrix* mod_matrix;
 	mod_matrix = (modularity_matrix*)malloc(sizeof(modularity_matrix));
@@ -26,7 +26,8 @@ modularity_matrix* create_modularity_matrix(sparse_matrix *adjacency_matrix, arr
 unsigned int* calc_sub_degrees_vector(array* sub_vertices_group, modularity_matrix* mod_matrix) {
 
 	unsigned int i, subgroup_size;
-	unsigned int *sub_degrees_vector, *sub_degrees_vector_ptr, *degrees_vector_ptr, *sub_vertices_group_ptr;
+	unsigned int *sub_degrees_vector, *sub_degrees_vector_ptr, *sub_vertices_group_ptr;
+	const unsigned int *degrees_vector_ptr;
 
 	sub_degrees_vector = (unsigned int*)calloc(sub_vertices_group->size, sizeof(unsigned int));
 	sub_degrees_vector_ptr = sub_degrees_vector;
