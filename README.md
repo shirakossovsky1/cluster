@@ -1,3 +1,3 @@
-# cluster
-# the best cluster in the world!
-# by Noam Keiny & Shira Kossovsky
+# Cluster
+# The best cluster in the world!
+# By Noam Keiny & Shira Kossovsky
