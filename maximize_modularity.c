@@ -3,7 +3,6 @@
 
 /* allocate memory for all optimization set properties */
 optimization_set* create_optimization_set(int group_size) {
-
 	optimization_set *opt;
 
 	opt = (optimization_set*)malloc(sizeof(optimization_set));
@@ -18,6 +17,23 @@ optimization_set* create_optimization_set(int group_size) {
 	return opt;
 }
 
+float calc_modularity_delta(leading_eigenpair* eigenpair) {
+
+	float product_result, *tmp_vec;
+    int vec_size;
+
+    vec_size = eigenpair->mod_matrix->sub_vertices_group ->size;
+
+	tmp_vec = (float*)calloc(sizeof(float),(vec_size));
+
+	tmp_vec = mult_matrix_by_vector(eigenpair->mod_matrix, eigenpair->division_vector, tmp_vec, vec_size, false, true);
+	product_result = float_dot_product(eigenpair->division_vector, tmp_vec, vec_size);
+
+	free(tmp_vec);
+
+	return 0.5 * product_result;
+}
+
 /* main function which optimizes the modularity of given division */
 float improve_modularity(leading_eigenpair* eigenpair) {
 
@@ -28,6 +44,18 @@ float improve_modularity(leading_eigenpair* eigenpair) {
 
 	division_vector = eigenpair->division_vector;
 	group_size = eigenpair->mod_matrix->sub_vertices_group->size;
+
+	/*printf("%s","sub group is ");
+	for (i = 0; i < group_size; i++) {
+		printf("%d ",eigenpair->mod_matrix->sub_vertices_group->array[i]);
+	}
+	printf("%s\n"," ");
+
+	printf("%s","division vector is ");
+	for (i = 0; i < group_size; i++) {
+		printf("%f ",division_vector[i]);
+	}
+	printf("%s\n"," ");*/
 
 	opt = create_optimization_set(group_size);
 
@@ -57,7 +85,7 @@ float improve_modularity(leading_eigenpair* eigenpair) {
 		}
 
 		/* store the max accomulative improvemnt */
-		if (first || *max_improvemnt_ptr > opt->improvement->max_value) {
+		if (first || *max_improvemnt_ptr >= opt->improvement->max_value) {
 			opt->improvement->max_value = *max_improvemnt_ptr;
 			opt->improvement->arg_max = i;
 			first = false;
@@ -67,7 +95,15 @@ float improve_modularity(leading_eigenpair* eigenpair) {
 		max_improvemnt_ptr++;
 	}
 
+	/*printf("%s","improvement array is ");
+	for (i = 0; i < group_size; i++) {
+		printf("%f ",opt->improvement->array[i]);
+	}
+	printf(", arg max is %f \n",opt->improvement->max_value);*/
+
 	delta_q = calc_final_division(group_size, opt->improvement, division_vector, opt->indices);
+
+	free_optimization_set(opt);
 
 	return delta_q;
 }
@@ -105,6 +141,12 @@ void calc_score_first_iteration(max_in_array *score, unsigned int group_size, le
 		score_ptr++;
 	}
 
+	/*printf("%s","score array is ");
+	for (j = 0; j < group_size; j++) {
+		printf("%f ",score->array[j]);
+	}
+	printf(", arg max is %f\n",score->max_value);*/
+
 	free(mult_result);
 
 	return;
@@ -133,19 +175,26 @@ void calc_score(max_in_array *score, unsigned int group_size, unsigned int* unmo
 			row = eigenpair->mod_matrix->sub_vertices_group->array[j];
 			col = eigenpair->mod_matrix->sub_vertices_group->array[curr_arg_max];
 			*score_ptr -= 4.0 * *division_vector_ptr * s_k * calc_mod_matrix_cell(eigenpair->mod_matrix, row, col, 0, false);
-		}
+			/*printf("matrix cell (%d,%d) is %f\n",row, col, calc_mod_matrix_cell(eigenpair->mod_matrix, row, col, 0, false));*/
 
-		/* restore the max score and the vertex with the maximal score (which is going to be moved) */
-		if (first || *score_ptr >= score->max_value) {
-			score->max_value = *score_ptr;
-			score->arg_max = j;
-			first = false;
+			/* restore the max score and the vertex with the maximal score (which is going to be moved) */
+			if (first || *score_ptr >= score->max_value) {
+				score->max_value = *score_ptr;
+				score->arg_max = j;
+				first = false;
+			}
 		}
 
 		division_vector_ptr++;
 		score_ptr++;
 		unmoved_ptr++;
 	}
+	/*printf("%s","score array is ");
+	for (j = 0; j < group_size; j++) {
+		printf("%f ",score->array[j]);
+	}
+	printf(", arg max is %f\n",score->max_value);*/
+
 	return;
 }
 

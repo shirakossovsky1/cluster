@@ -21,5 +21,6 @@ typedef struct division{
 division* create_division(float* division_vector, array* original_subgroup);
 void divide(division *curr_division, array* original_subgroup);
 void free_division(division *division);
+void change_to_homogenic_devision(float* division_vector, unsigned int vec_size);
 
 #endif /* DIVISION_H_ */

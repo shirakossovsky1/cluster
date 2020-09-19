@@ -1,6 +1,9 @@
 
 #include "power_iteration.h"
 
+#define MAX_ITERATIONNS() (1000000)
+#define EPSILON 0.0001
+
 /* main function which executes the process of power iteration */
 void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 
@@ -12,6 +15,8 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 	/* initializing random vector and properties */
 	num_rows = mod_matrix->sub_vertices_group ->size;
 
+	printf("%s\n", "starting power iteration");
+
 	vec_0 = (float*) calloc(num_rows, sizeof(float));
 	curr_vec = (float*) calloc(num_rows, sizeof(float));
 
@@ -22,8 +27,9 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 	vec_0 = generate_rand_vec(vec_0,num_rows);
 	get_next_vec(mod_matrix, vec_0, next_vec, num_rows);
 
+	printf("%s\n", "starting while");
 	/* run the iterative process until the change in the new vector is small enough */
-	while (first || (smaller_than_eps(curr_vec, next_vec, num_rows) != 1 && (i < 1000000))) {
+	while (first || ((smaller_than_eps(curr_vec, next_vec, num_rows)) != 1 && (i < MAX_ITERATIONNS()))) {
 
 		first = false;
 		curr_vec_ptr = curr_vec;
@@ -39,6 +45,9 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 		i++;
 	}
 
+	printf("i = %d\n", i);
+
+	printf("%s\n", "finishing while");
 	next_vec_ptr = next_vec;
 
 	/* copy the final vector values into the eigenvector */
@@ -50,6 +59,8 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 	free(vec_0);
 	free(curr_vec);
 
+	printf("%s\n", "finishing power iteration");
+
 	return;
 
 }
@@ -58,9 +69,11 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 float* generate_rand_vec(float* vec_0, unsigned int vec_size) {
 
 	float* vec_0_ptr;
+	unsigned int i=0;
 
 	for (vec_0_ptr=vec_0 ; vec_0_ptr < &vec_0[vec_size] ; vec_0_ptr++){
 		*vec_0_ptr = rand()%10;
+		i++;
 	}
 
 	return vec_0;
@@ -70,12 +83,11 @@ float* generate_rand_vec(float* vec_0, unsigned int vec_size) {
 unsigned int smaller_than_eps(float* vec, float* next_vec, unsigned int vec_size) {
 
 	float *vec_ptr, *next_vec_ptr;
-	float epsilon = 0.0001;
 
 	next_vec_ptr = next_vec;
 
 	for (vec_ptr=vec; vec_ptr <= &vec[vec_size-1]; vec_ptr++) {
-		if (fabs(*next_vec_ptr - *vec_ptr) >= epsilon) {
+		if (fabs(*next_vec_ptr - *vec_ptr) >= EPSILON) {
 			return 0;
 		}
 		next_vec_ptr++;

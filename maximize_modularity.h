@@ -23,6 +23,7 @@ typedef struct optimization_set {
 } optimization_set;
 
 optimization_set* create_optimization_set(int group_size);
+float calc_modularity_delta(leading_eigenpair* eigenpair);
 float improve_modularity(leading_eigenpair* eigenpair);
 void calc_score_first_iteration(max_in_array *score, unsigned int group_size, leading_eigenpair* eigenpair);
 void calc_score(max_in_array *score, unsigned int group_size, unsigned int* unmoved, leading_eigenpair* eigenpair);

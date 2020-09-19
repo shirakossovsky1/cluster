@@ -75,5 +75,18 @@ void free_division(division *division){
 
 }
 
+/* change inplace the division vector to contain only 1's because the group is indivisible */
+void change_to_homogenic_devision(float* division_vector, unsigned int vec_size) {
+
+	unsigned int i;
+	float *division_vector_ptr;
+
+	division_vector_ptr = division_vector;
+	for (i = 0; i < vec_size; i++) {
+		*division_vector_ptr = 1.0;
+		division_vector_ptr++;
+	}
+}
+
 
 
