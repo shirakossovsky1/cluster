@@ -159,8 +159,6 @@ float calc_norm_1(modularity_matrix* mod_matrix) {
 
 	}
 
-	/*printf("Matrix norm = %f\n", max_col_sum);*/
-
 	return max_col_sum;
 
 	}

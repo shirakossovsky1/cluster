@@ -2,7 +2,7 @@
 #include "power_iteration.h"
 
 #define MAX_ITERATIONNS() (1000000)
-#define EPSILON 0.0001
+#define EPSILON 0.00001
 
 /* main function which executes the process of power iteration */
 void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
@@ -15,8 +15,6 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 	/* initializing random vector and properties */
 	num_rows = mod_matrix->sub_vertices_group ->size;
 
-	printf("%s\n", "starting power iteration");
-
 	vec_0 = (float*) calloc(num_rows, sizeof(float));
 	curr_vec = (float*) calloc(num_rows, sizeof(float));
 
@@ -27,7 +25,6 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 	vec_0 = generate_rand_vec(vec_0,num_rows);
 	get_next_vec(mod_matrix, vec_0, next_vec, num_rows);
 
-	printf("%s\n", "starting while");
 	/* run the iterative process until the change in the new vector is small enough */
 	while (first || ((smaller_than_eps(curr_vec, next_vec, num_rows)) != 1 && (i < MAX_ITERATIONNS()))) {
 
@@ -45,9 +42,6 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 		i++;
 	}
 
-	printf("i = %d\n", i);
-
-	printf("%s\n", "finishing while");
 	next_vec_ptr = next_vec;
 
 	/* copy the final vector values into the eigenvector */
@@ -59,8 +53,6 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 	free(vec_0);
 	free(curr_vec);
 
-	printf("%s\n", "finishing power iteration");
-
 	return;
 
 }
@@ -69,11 +61,9 @@ void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector) {
 float* generate_rand_vec(float* vec_0, unsigned int vec_size) {
 
 	float* vec_0_ptr;
-	unsigned int i=0;
 
 	for (vec_0_ptr=vec_0 ; vec_0_ptr < &vec_0[vec_size] ; vec_0_ptr++){
 		*vec_0_ptr = rand()%10;
-		i++;
 	}
 
 	return vec_0;
@@ -96,20 +86,35 @@ unsigned int smaller_than_eps(float* vec, float* next_vec, unsigned int vec_size
 }
 
 /* main calculation for the iterative process */
-void get_next_vec(modularity_matrix* mod_matrix, float* vec, float* next_vec,
-		unsigned int vec_size){
+void get_next_vec(modularity_matrix* mod_matrix, float* vec, float* next_vec, unsigned int vec_size){
 
-	float result, vec_norm = 0.0, *next_vec_ptr;
-	unsigned int curr_row = 0;
+	float result, vec_norm = 0.0, *sparse_comp_vec, *modularity_comp_vec, *mod_vec_comp_vec,
+			*next_vec_ptr, *sparse_comp_vec_ptr, *modularity_comp_vec_ptr, *mod_vec_comp_vec_ptr;
+	unsigned int i = 0;
+
+	sparse_comp_vec = (float*) calloc(vec_size, sizeof(float));
+	modularity_comp_vec = (float*) calloc(vec_size, sizeof(float));
+	mod_vec_comp_vec = (float*) calloc(vec_size, sizeof(float));
+
+	sparse_comp_vec = mult_sparse_matrix_by_vector(mod_matrix, vec, sparse_comp_vec, vec_size);
+	modularity_comp_vec = mult_modularity_addition_by_vec(mod_matrix, vec, modularity_comp_vec, vec_size);
+	mod_vec_comp_vec = mult_vec_by_vec_and_shift(mod_matrix->vertices_mod_vec, vec, mod_vec_comp_vec, vec_size, mod_matrix->norm_1);
 
 	next_vec_ptr = next_vec;
+	sparse_comp_vec_ptr = sparse_comp_vec;
+	modularity_comp_vec_ptr = modularity_comp_vec;
+	mod_vec_comp_vec_ptr = mod_vec_comp_vec;
 
-	for (curr_row = 0; curr_row < vec_size ; curr_row++) {
-		result = mult_modularity_mat_row_by_vec(mod_matrix, vec, curr_row, true, true);
+	for (i = 0; i < vec_size ; i++) {
+		result = *sparse_comp_vec_ptr - *modularity_comp_vec_ptr - *mod_vec_comp_vec_ptr;
 
 		vec_norm += result * result;
 		*next_vec_ptr = result;
+
 		next_vec_ptr++;
+		sparse_comp_vec_ptr++;
+		modularity_comp_vec_ptr++;
+		mod_vec_comp_vec_ptr++;
  	}
 
 	vec_norm = sqrt(vec_norm);
@@ -119,5 +124,30 @@ void get_next_vec(modularity_matrix* mod_matrix, float* vec, float* next_vec,
 		*next_vec_ptr = *(next_vec_ptr) / vec_norm;
 	}
 
+	free(sparse_comp_vec);
+	free(modularity_comp_vec);
+	free(mod_vec_comp_vec);
+
 	return;
+}
+
+/* multiply the expected degrees vector by vector, part of power iteration */
+float* mult_modularity_addition_by_vec(modularity_matrix* mod_matrix, float* vec, float* result_vec, unsigned int vec_size) {
+
+	float result;
+	float *result_vec_ptr;
+	unsigned int i, *sub_degrees_vec_ptr;
+
+	sub_degrees_vec_ptr = mod_matrix->sub_degrees_vector;
+	result_vec_ptr = result_vec;
+
+	result = (int_dot_product(mod_matrix->sub_degrees_vector, vec, vec_size)) / (float)mod_matrix->total_degrees_num;
+
+	for (i = 0; i < vec_size; i++){
+		*result_vec_ptr = (float)*sub_degrees_vec_ptr * result;
+		result_vec_ptr++;
+		sub_degrees_vec_ptr++;
+	}
+
+	return result_vec;
 }

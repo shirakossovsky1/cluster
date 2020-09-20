@@ -28,12 +28,6 @@ float* find_leading_eigenvector(modularity_matrix* mod_matrix){
 	eigenvector = (float*)malloc(sizeof(float)*mod_matrix -> sub_vertices_group -> size);
 	power_iteration(mod_matrix, eigenvector);
 
-	/*printf("%s", "Eigenvector: ");
-	for (i = 0; i < mod_matrix -> sub_vertices_group -> size; i++) {
-		printf("%f ", eigenvector[i]);
-	}
-	printf("%s\n ", "");*/
-
 	return eigenvector;
 }
 
@@ -54,8 +48,6 @@ float find_leading_eigenvalue(leading_eigenpair* eigenpair){
 	check_float_division_by_zero(denominator);
 
 	free(tmp_vec);
-
-	/*printf("Eigenvalue = %f\n", (numerator / denominator) - (eigenpair -> mod_matrix -> norm_1)); */
 
 	return ((numerator / denominator) - (eigenpair -> mod_matrix -> norm_1));
 }

@@ -15,10 +15,11 @@
 #include "modularity_matrix.h"
 
 float* mult_matrix_by_vector(modularity_matrix* mod_matrix, float* vec, float* result_vec, unsigned int vec_size, bool to_shift,  bool to_hat);
+float* mult_sparse_matrix_by_vector(modularity_matrix* mod_matrix, float* vec, float* result_vec, unsigned int vec_size);
 float mult_modularity_mat_row_by_vec(modularity_matrix* mod_matrix, float *vec, unsigned int row, bool to_shift, bool to_hat);
 float mult_sparse_mat_row_by_vec(modularity_matrix* mod_matrix, float *vec, unsigned int row);
 float float_dot_product(float* vector_1, float* vector_2, unsigned int vec_size);
 float int_dot_product(unsigned int* vector_1, float* vector_2, unsigned int vec_size);
-float sum_vec(float* vector, unsigned int vec_size);
+float* mult_vec_by_vec_and_shift(float* vector_1, float* vector_2, float* result_vec, unsigned int vec_size, float shift_value);
 
 #endif /* LINEAR_ALGEBRA_UTILS_H_ */

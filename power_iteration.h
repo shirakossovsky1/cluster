@@ -20,7 +20,8 @@
 
 void power_iteration(modularity_matrix* mod_matrix, float* eigen_vector);
 float* generate_rand_vec(float* vec_0, unsigned int vec_size);
-void get_next_vec(modularity_matrix* mod_matrix, float* vec, float* next_vec, unsigned int vec_size);
 unsigned int smaller_than_eps(float* vec, float* next_vec, unsigned int vec_size);
+void get_next_vec(modularity_matrix* mod_matrix, float* vec, float* next_vec, unsigned int vec_size);
+float* mult_modularity_addition_by_vec(modularity_matrix* mod_matrix, float* vec, float* result_vec, unsigned int vec_size);
 
 #endif /* POWER_ITERATION_H_ */

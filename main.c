@@ -5,7 +5,6 @@
  ============================================================================
  */
 
-#include <time.h>
 #include "leading_eigenpair.h"
 #include "maximize_modularity.h"
 #include "division.h"
@@ -25,9 +24,9 @@ int main(int argc, char* argv[]) {
 	leading_eigenpair* leading_pair;
 	division *division;
 
-	FILE *input_file, *output_file;
-
 	clock_t	start_time, end_time;
+
+	FILE *input_file, *output_file;
 
 	/* read inputs and check variables */
 	input_file = fopen(argv[1], "r");
@@ -69,14 +68,10 @@ int main(int argc, char* argv[]) {
 	while (groups_queue->size > 0) {
 
 		/* calculate group's modularity */
-		printf("%s\n", "starting new subgroup");
 		sub_vertices_group = pop(groups_queue);
 		mod_matrix = create_modularity_matrix(adjacency_matrix, sub_vertices_group);
 		leading_pair = create_eigenpair(mod_matrix);
-		printf("%s\n", "calculating delta");
 		modularity_delta = calc_modularity_delta(leading_pair);
-
-		/*printf("modularity is %f\n", modularity_delta);*/
 
 		/* if eigenvalue or modularity are negative, the group is indivisible */
 		if (IS_NOT_POSITIVE(leading_pair->leading_eigenvalue) ||
@@ -86,12 +81,10 @@ int main(int argc, char* argv[]) {
 
 		/* improve group's modularity, only if eigenvalue is positive */
 		if (IS_POSITIVE(leading_pair->leading_eigenvalue)) {
-			printf("%s\n", "starting maximization");
 			modularity_delta = improve_modularity(leading_pair);
 			while (IS_POSITIVE(modularity_delta)) {
-				modularity_delta = improve_modularity(leading_pair); /* algorithm 4 */
+				modularity_delta = improve_modularity(leading_pair);
 			}
-			printf("%s\n", "finishing maximization");
 		}
 
 		/* create division into two new groups */
@@ -100,7 +93,6 @@ int main(int argc, char* argv[]) {
 		free_leading_eigenpair(leading_pair);
 		free_modularity_matrix(mod_matrix);
 
-		printf("%s\n", "handeling division");
 		/* handle a case when one sub-group is empty, insert into relevant queues */
 		if (division->g1->size == 0) {
 			free_array(division->g1);

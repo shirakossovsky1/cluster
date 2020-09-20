@@ -18,6 +18,25 @@ float* mult_matrix_by_vector(modularity_matrix* mod_matrix, float* vec, float* r
 
 }
 
+/* compute multiplication of a matrix by vector */
+float* mult_sparse_matrix_by_vector(modularity_matrix* mod_matrix, float* vec, float* result_vec, unsigned int vec_size){
+
+	float result, *vec_ptr, *next_vec_ptr = result_vec;
+	unsigned int curr_row = 0, row_in_original_matrix;
+
+	for (vec_ptr=vec; vec_ptr < &vec[vec_size]; vec_ptr++) {
+		row_in_original_matrix = mod_matrix->sub_vertices_group->array[curr_row];
+		result = mult_sparse_mat_row_by_vec(mod_matrix, vec, row_in_original_matrix);
+		*next_vec_ptr = result;
+
+		next_vec_ptr++;
+		curr_row++;
+ 	}
+
+	return result_vec;
+
+}
+
 /* compute multiplication of a modularity matrix by vector */
 float mult_modularity_mat_row_by_vec(modularity_matrix* mod_matrix, float *vec, unsigned int row, bool to_shift, bool to_hat){
 
@@ -112,20 +131,24 @@ float int_dot_product(unsigned int* vector_1, float* vector_2, unsigned int vec_
 	return result;
 }
 
-/* compute the sum of vector values */
-float sum_vec(float* vector, unsigned int vec_size){
+/* compute multiplication of two vectors, value by value */
+float* mult_vec_by_vec_and_shift(float* vector_1, float* vector_2, float* result_vec, unsigned int vec_size, float shift_value) {
 
-	float result = 0.0;
-	float *vector_ptr;
 	unsigned int i;
+	float *result_vec_ptr, *vector_1_ptr, *vector_2_ptr;
 
-	vector_ptr = vector;
+	vector_1_ptr = vector_1;
+	vector_2_ptr = vector_2;
+	result_vec_ptr = result_vec;
 
 	for (i = 0; i < vec_size; i++) {
-		result += (float)*vector_ptr;
-		vector_ptr++;
+		*result_vec_ptr = (*vector_1_ptr - shift_value) * *vector_2_ptr;
+		vector_1_ptr++;
+		vector_2_ptr++;
+		result_vec_ptr++;
 	}
-	return result;
+
+	return result_vec;
 }
 
 
